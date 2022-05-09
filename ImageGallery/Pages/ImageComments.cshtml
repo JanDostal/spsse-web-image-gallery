@@ -1,0 +1,956 @@
+﻿@page
+@model GalleryDatabase.Pages.ImageCommentsModel
+@{
+    ViewData["Title"] = "Image " + Model.Image.OriginalName + "'s Comments";
+}
+
+<div class="jumbotron commentsPageHeader">
+    <h1 class="display-4">Chosen Image Comments<br /><b>@Model.Image.NumberOfComments</b></h1>
+</div>
+<div class="row writeCommentSection">
+    @if (Model.GetUserId() == null)
+    {
+        <div class="alert alert-info commentingRestriction" role="alert">
+            if you want to comment image, reply to someone else comments or review a comments, you need to <b>log in</b>.
+        </div>
+
+    }
+    else
+    {
+
+        <form method="post" asp-page-handler="createComment" asp-route-userId="@Model.GetUserId()" asp-route-imageId="@Model.Image.ImageId" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+              asp-route-albumId="@Model.SourceAlbumId" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-sourcePath="@Model.SourcePath">
+
+            <div class="col-12 writeCommentBox">
+                @if (Model.GetUserId() != null && Model.CurrentUser.ProfileImageSize != null)
+                {
+                    <img class="rounded-circle"
+                         src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = Model.CurrentUser.Email, type = "1" })" width="40" alt="userProfileImage">
+
+                }
+                else
+                {
+                    <img class="rounded-circle"
+                         src="~/pictograms/bigDefaultProfileImage.jpg" width="40" alt="userProfileImageGeneric">
+                }
+
+                <textarea asp-for="@Model.Comment.Content" placeholder="Add a public comment..." class="textarea" role="textbox"></textarea>
+
+            </div>
+            <div class="col-12 flexBasedColumn">
+                <a class="btn btn-danger" asp-page-handler="cancelComment" asp-route-imageId="@Model.Image.ImageId" asp-route-sourcePath="@Model.SourcePath"
+                   asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                   asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"> Cancel</a>
+
+                <input class="btn btn-dark" type="submit" value="Comment" />
+
+            </div>
+
+        </form>
+    }
+</div>
+
+<div class="container commentsContainer">
+    <div class="row">
+        <div class="col-md-12">
+            <form method="post" asp-page-handler="commentsSettings" asp-route-imageId="@Model.Image.ImageId" asp-route-sourcePath="@Model.SourcePath"
+                  asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId" class="row">
+                <div class="form-group col orderBy">
+                    <label asp-for="CommentsMethod" class="control-label"><b>Method of sorting</b></label>
+                    <select asp-for="CommentsMethod" class="form-control" asp-items="@Model.CommentsMethodOfSortingList"></select>
+                </div>
+                <div class="form-group col methodOfSorting">
+                    <label asp-for="CommentsOrderBy" class="control-label"><b>Order by</b></label>
+                    <select asp-for="CommentsOrderBy" class="form-control" asp-items="Model.CommentsOrderByList"></select>
+                </div>
+                <div class="col sortingSubmitButton">
+                    <input type="submit" value="Sort" class="btn btn-primary" />
+
+                </div>
+            </form>
+            @if (Model.CommentsFromService.Any() == true)
+            {
+                Model.Counter = 1;
+                <ul>
+                    @foreach (var standardComment in Model.CommentsFromService)
+                    {
+                        Model.CommentViewId = Model.GetCommentViewId(Model.Counter);
+                        <li>
+
+                            <div  id="@("comment" + Model.CommentViewId)" class="col standardComment">
+                                @if (standardComment.DateUserWasRemoved != null || standardComment.User.ProfileImageSize == null)
+                                {
+                                    <img class="rounded-circle"
+                                         src="~/pictograms/bigDefaultProfileImage.jpg" width="40" height="40" loading="lazy" alt="@("bigProfileImage" + Model.Counter)">
+                                }
+                                else
+                                {
+                                    <img class="rounded-circle"
+                                         src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = standardComment.User.Email, type = "1" })"
+                                         width="40" height="40" loading="lazy" alt="@("smallProfileImage" + Model.Counter)">
+                                }
+
+                                <div class="comment-body">
+                                    @if (standardComment.DateUserWasRemoved != null)
+                                    {
+                                        <div class="row commentHeading">
+
+                                            <span class="text-secondary headingDeleted">
+                                                [deleted]
+                                            </span>
+
+                                            @if (standardComment.DateUserWasRemoved != null)
+                                            {
+                                                <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DateUserWasRemoved">@standardComment.TimeDifferenceOfDateUserWasRemoved</p>
+
+                                            }
+                                            else if (standardComment.WasEdited == true)
+                                            {
+                                                <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted @(" (edited)")</p>
+
+                                            }
+                                            else
+                                            {
+                                                <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted</p>
+                                            }
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        if (standardComment.UserId == Model.Image.Album.GalleryOwnerId)
+                                        {
+                                            <div class="row commentAuthorRelationToImage">
+                                                <span>Author</span>
+                                            </div>
+
+                                        }
+
+                                        <div class="row commentHeading">
+
+                                            <a data-toggle="tooltip" data-placement="top" title="@("Send mail to " + standardComment.User.Email)" href="@("mailto:" + standardComment.User.Email)" target="_blank" rel="noopener noreferrer">
+                                                @standardComment.User.UserNameForComments
+                                            </a>
+
+
+                                            @if (standardComment.DateUserWasRemoved != null)
+                                            {
+                                                <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DateUserWasRemoved">@standardComment.TimeDifferenceOfDateUserWasRemoved</p>
+
+                                            }
+                                            else if (standardComment.WasEdited == true)
+                                            {
+                                                <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted @(" (edited)")</p>
+
+                                            }
+                                            else
+                                            {
+                                                <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted</p>
+                                            }
+
+                                        </div>
+                                    }
+
+                                    @if (standardComment.DateUserWasRemoved != null)
+                                    {
+                                        <div class="deletedContent text-secondary">Comment was deleted</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="commentContent">@standardComment.Content</div>
+
+                                    }
+                                    <div class="row commentOptions">
+                                        <div class="col-12">
+                                            @if (standardComment.DateUserWasRemoved == null)
+                                            {
+                                                @if (Model.GetUserId() == null)
+                                                {
+                                                    <img class="thumbUpIcon" width="16" height="16" src="/pictograms/thumb_up_black_24dp.svg" loading="lazy" alt="@("like" + Model.Counter)" />
+
+                                                }
+                                                else
+                                                {
+                                                    @if (standardComment.CommentUser == null || standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Dislike)
+                                                    {
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="Like" asp-page-handler="likeComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                                           asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                           asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" asp-route-albumId="@Model.SourceAlbumId"
+                                                           class="btn likeComment">
+                                                            <img width="16" height="16" src="/pictograms/thumb_up_black_24dp.svg" loading="lazy" alt="@("like" + Model.Counter)" />
+                                                        </a>
+                                                    }
+                                                    else if (standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Like)
+                                                    {
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="Unlike" asp-page-handler="unlikeComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                                           asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                           asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" asp-route-albumId="@Model.SourceAlbumId"
+                                                           class="btn unlikeComment">
+                                                            <img width="16" height="16" src="/pictograms/thumb_up_black_24dp.svg" loading="lazy" alt="@("unlike" + Model.Counter)" />
+                                                        </a>
+                                                    }
+                                                }
+
+                                                @if (standardComment.NumberOfLikes != null)
+                                                {
+                                                    <span class="text-secondary numberOfLikes">@standardComment.NumberOfLikes</span>
+
+                                                }
+
+                                                @if (Model.GetUserId() == null)
+                                                {
+                                                    <img class="thumbDownIcon" width="16" height="16" src="~/pictograms/thumb_down_black_24dp.svg" loading="lazy" alt="@("dislike" + Model.Counter)" />
+
+                                                }
+                                                else
+                                                {
+                                                    @if (standardComment.CommentUser == null || standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Like)
+                                                    {
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="Dislike" asp-page-handler="dislikeComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                                           asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                           asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" asp-route-albumId="@Model.SourceAlbumId"
+                                                           class="btn dislikeComment">
+                                                            <img width="16" height="16" src="~/pictograms/thumb_down_black_24dp.svg" loading="lazy" alt="@("dislike" + Model.Counter)" />
+                                                        </a>
+                                                    }
+                                                    else if (standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Dislike)
+                                                    {
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="Remove dislike" asp-page-handler="removeDislikeForComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                                           asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                           asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" asp-route-albumId="@Model.SourceAlbumId"
+                                                           class="btn removeDislikeOnComment">
+                                                            <img width="16" height="16" src="/pictograms/thumb_down_black_24dp.svg" loading="lazy" alt="@("removeDislike" + Model.Counter)"  />
+                                                        </a>
+                                                    }
+                                                }
+
+                                                @if (standardComment.NumberOfDislikes != null)
+                                                {
+                                                    <span class="text-secondary numberOfDislikes">@standardComment.NumberOfDislikes</span>
+
+                                                }
+                                            }
+
+
+                                            @if (Model.GetUserId() != null)
+                                            {
+                                                if (standardComment.DateUserWasRemoved == null)
+                                                {
+                                                    <button data-target="@("#commentReplySettings" + Model.CommentViewId)" data-toggle="modal" class="btn reply" type="button">
+                                                        REPLY
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button data-target="@("#commentReplySettings" + Model.CommentViewId)" data-toggle="modal" class="btn replyForDeletedComment" type="button">
+                                                        REPLY
+                                                    </button>
+                                                }
+
+                                                if (standardComment.DateUserWasRemoved == null)
+                                                {
+                                                    if (standardComment.UserId == Model.GetUserId() || Model.GetUserId() == Model.Image.Album.GalleryOwnerId)
+                                                    {
+                                                        <button type="button" class="btn moreOptions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <img src="~/pictograms/more_horiz_black_24dp.svg" width="24" height="24" loading="lazy" alt="@("dropdownMoreOptions" + Model.Counter)">
+                                                        </button>
+                                                    }
+
+                                                    if (standardComment.UserId == Model.GetUserId() || Model.GetUserId() == Model.Image.Album.GalleryOwnerId)
+                                                    {
+                                                        <div class="dropdown-menu">
+                                                            @if (standardComment.UserId == Model.GetUserId())
+                                                            {
+                                                                <button class="dropdown-item" data-target="@("#commentEditSettings" + Model.CommentViewId)" data-toggle="modal">Edit</button>
+
+                                                            }
+                                                            <a class="dropdown-item" asp-page-handler="deleteComment" asp-route-currentCounter="@Model.Counter" asp-route-commentViewId="@Model.CommentViewId"
+                                                               asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId"
+                                                               asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                               asp-route-albumId="@Model.SourceAlbumId" asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy">Delete</a>
+                                                        </div>
+                                                    }
+
+                                                }
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                @if (standardComment.DateUserWasRemoved == null && Model.GetUserId() == standardComment.UserId)
+                                {
+                                    <div id="@("commentEditSettings" + Model.CommentViewId)" aria-labelledby="@("commentEditSettings" + Model.CommentViewId + "Label")"
+                                         class="modal fade editModal" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 id="@("commentEditSettings" + Model.CommentViewId + "Label")" class="modal-title">Edit your chosen comment</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="alert alert-info">
+
+                                                        <em>If you want to view full content of comment, </em><b>click on it.</b>
+                                                    </div>
+                                                    <hr />
+                                                    @if (TempData["CommentStateSuccessMessage"] != null && Model.ChosenCommentIndex == Model.Counter)
+                                                    {
+                                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                            @TempData["CommentStateSuccessMessage"]
+                                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                    else if (TempData["CommentStateErrorMessage"] != null && Model.ChosenCommentIndex == Model.Counter)
+                                                    {
+                                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                            @TempData["CommentStateErrorMessage"]
+                                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                    }
+
+                                                    <form method="post">
+
+                                                        <div class="editBox">
+                                                            @if (Model.CurrentUser.ProfileImageSize != null)
+                                                            {
+                                                                <img class="rounded-circle"
+                                                                     src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = Model.CurrentUser.Email, type = "1" })"
+                                                                     width="40" height="40" loading="lazy" alt="@("bigProfileImageEdit" + Model.Counter)">
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <img class="rounded-circle"
+                                                                     src="~/pictograms/bigDefaultProfileImage.jpg" width="40" height="40" loading="lazy" alt="@("bigProfileImageGenericEdit" + Model.Counter)">
+                                                            }
+
+
+                                                            <textarea asp-for="@standardComment.Content" name="content" placeholder="Add a public comment..."
+                                                                      class="textarea"></textarea>
+
+                                                        </div>
+                                                        <div class="flexBasedColumn">
+                                                            <input type="submit" class="btn btn-danger" asp-page-handler="restoreComment" asp-route-imageId="@Model.Image.ImageId"
+                                                                   asp-route-sourcePath="@Model.SourcePath" asp-route-commentViewId="@Model.CommentViewId" asp-route-chosenCommentIndex="@Model.Counter"
+                                                                   asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                                                                   asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" value="Cancel" />
+
+                                                            <input class="btn btn-success" type="submit" value="Save" asp-page-handler="editComment" asp-route-imageId="@Model.Image.ImageId"
+                                                                   asp-route-sourcePath="@Model.SourcePath" asp-route-commentViewId="@Model.CommentViewId" asp-route-commentId="@standardComment.CommentId"
+                                                                   asp-route-chosenCommentIndex="@Model.Counter"
+                                                                   asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                                                                   asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" />
+
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="alert alert-info single">
+                                                        <a asp-page-handler="moveToChosenComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId"
+                                                           asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                           asp-route-albumId="@Model.SourceAlbumId"
+                                                           asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                                           data-toggle="tooltip" data-placement="top"
+                                                           title="Move to this specific comment."><em>Order of Comment:</em> <b>@(Model.Counter)th</b></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.GetUserId() != null)
+                                {
+                                    <div id="@("commentReplySettings" + Model.CommentViewId)" aria-labelledby="@("commentReplySettings" + Model.CommentViewId + "Label")"
+                                         class="modal fade replyModal" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    @if (standardComment.DateUserWasRemoved == null)
+                                                    {
+                                                        <h5 id="@("commentReplySettings" + Model.CommentViewId + "Label")" class="modal-title">Reply to @(standardComment.User.UserNameForComments)'s comment</h5>
+                                                    }
+                                                    else
+                                                    {
+                                                        <h5 id="@("commentReplySettings" + Model.CommentViewId + "Label")" class="modal-title">Reply to deleted comment</h5>
+
+                                                    }
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @if (TempData["CommentStateSuccessMessage"] != null && Model.ChosenReplyIndex == Model.Counter)
+                                                    {
+                                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                            @TempData["CommentStateSuccessMessage"]
+                                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                    else if (TempData["CommentStateErrorMessage"] != null && Model.ChosenReplyIndex == Model.Counter)
+                                                    {
+                                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                            @TempData["CommentStateErrorMessage"]
+                                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                    <form method="post">
+
+                                                        <div class="replyBox">
+                                                            @if (Model.CurrentUser.ProfileImageSize != null)
+                                                            {
+                                                                <img class="rounded-circle"
+                                                                     src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = Model.CurrentUser.Email, type = "1" })"
+                                                                     width="40" height="40" loading="lazy" alt="@("bigProfileImageReply" + Model.Counter)">
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <img class="rounded-circle"
+                                                                     src="~/pictograms/bigDefaultProfileImage.jpg"
+                                                                     width="40" height="40" loading="lazy" alt="@("bigProfileImageGenericReply" + Model.Counter)">
+                                                            }
+
+                                                            <textarea asp-for="@Model.Reply.Content" placeholder="Add a public reply..." class="textarea" role="textbox"></textarea>
+
+                                                        </div>
+                                                        <div class="flexBasedColumn">
+                                                            <input class="btn btn-danger" asp-page-handler="restoreComment" asp-route-imageId="@Model.Image.ImageId"
+                                                                   asp-route-sourcePath="@Model.SourcePath" asp-route-commentViewId="@Model.CommentViewId" asp-route-isReply="@true" asp-route-chosenCommentIndex="@Model.Counter"
+                                                                   asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                                                                   asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" type="submit"
+                                                                   value="Cancel" />
+
+                                                            <input class="btn btn-primary" type="submit" value="Reply"
+                                                                   asp-page-handler="createComment" asp-route-userId="@Model.GetUserId()" asp-route-currentCounter="@Model.Counter"
+                                                                   asp-route-imageId="@Model.Image.ImageId" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-parentCommentViewId="@Model.CommentViewId"
+                                                                   asp-route-albumId="@Model.SourceAlbumId" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-parentCommentId="@standardComment.CommentId"
+                                                                   asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                                                   asp-route-isReply="@true" asp-route-sourcePath="@Model.SourcePath" />
+
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="alert alert-info single">
+                                                        <a asp-page-handler="moveToChosenComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId"
+                                                           asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                           asp-route-albumId="@Model.SourceAlbumId"
+                                                           asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                                           data-toggle="tooltip" data-placement="top"
+                                                           title="Move to this specific comment.">
+                                                            @if (standardComment.DateUserWasRemoved == null)
+                                                            {
+                                                                <em>Order of @(standardComment.User.UserNameForComments)'s comment:</em>
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <em>Order of deleted comment:</em>
+
+                                                            }
+                                                            <b>@(Model.Counter)th</b>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @{
+                                Model.Counter++;
+                                Model.Replies = Model.GetCommentReplies(standardComment.CommentId);
+                            }
+
+
+                            @if (Model.Replies.Any())
+                            {
+                                <ul>
+                                    @{
+                                        await ShowCommentsTree(Model.Replies, Model.Counter, standardComment.CommentId);
+                                    }
+                                </ul>
+                            }
+
+
+                            @{
+                                if (Model.PreviousLevelCounter != 0)
+                                {
+                                    Model.Counter = Model.PreviousLevelCounter;
+                                    Model.PreviousLevelCounter = 0;
+                                }
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+@{
+    async Task ShowCommentsTree(IEnumerable<Models.CommentReadModel> comments, int counter, int rootCommentId = 0)
+    {
+        foreach (var standardComment in comments)
+        {
+            Model.CommentViewId = Model.GetCommentViewId(counter);
+            <li class="row">
+
+                <div id="@("comment" + Model.CommentViewId)" class="col replyComment">
+                    @if (standardComment.DateUserWasRemoved != null || standardComment.User.ProfileImageSize == null)
+                    {
+                        <img class="rounded-circle"
+                             src="~/pictograms/smallDefaultProfileImage.jpg"
+                             width="32" height="32" loading="lazy" alt="@("smallProfileImageGeneric" + Model.Counter)">
+                    }
+                    else
+                    {
+                        <img class="rounded-circle"
+                             src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = standardComment.User.Email, type = "0" })"
+                           width="32" height="32" loading="lazy" alt="@("smallProfileImage" + Model.Counter)">
+                    }
+
+                    <div class="comment-body">
+                        @if (standardComment.DateUserWasRemoved != null)
+                        {
+                            <div class="row commentHeading">
+
+                                <span class="text-secondary headingDeleted">
+                                    [deleted]
+                                </span>
+
+
+                                @if (standardComment.DateUserWasRemoved != null)
+                                {
+                                    <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DateUserWasRemoved">@standardComment.TimeDifferenceOfDateUserWasRemoved</p>
+
+                                }
+                                else if (standardComment.WasEdited == true)
+                                {
+                                    <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted @(" (edited)")</p>
+
+                                }
+                                else
+                                {
+                                    <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            if (standardComment.UserId == Model.Image.Album.GalleryOwnerId)
+                            {
+                                <div class="row commentAuthorRelationToImage">
+                                    <span>Author</span>
+                                </div>
+                            }
+
+
+                            <div class="row commentHeading">
+
+                                <a data-toggle="tooltip" data-placement="top" title="@("Send mail to " + standardComment.User.Email)" href="@("mailto:" + standardComment.User.Email)" target="_blank" rel="noopener noreferrer">
+                                    @standardComment.User.UserNameForComments
+                                </a>
+
+                                @if (standardComment.DateUserWasRemoved != null)
+                                {
+                                    <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DateUserWasRemoved">@standardComment.TimeDifferenceOfDateUserWasRemoved</p>
+
+                                }
+                                else if (standardComment.WasEdited == true)
+                                {
+                                    <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted @(" (edited)")</p>
+
+                                }
+                                else
+                                {
+                                    <p class="text-secondary greyTimeDifference" data-toggle="tooltip" data-placement="top" title="@standardComment.DatePosted">@standardComment.TimeDifferenceOfDatePosted</p>
+                                }
+                            </div>
+
+                        }
+
+                        @if (standardComment.DateUserWasRemoved != null)
+                        {
+                            if (standardComment.CommentedCommentId != rootCommentId && standardComment.CommentedCommentUserName == null)
+                            {
+                                <div class="deletedContent text-secondary"><span>@("@" + "[deleted]")</span> Comment was deleted</div>
+
+
+                            }
+                            else
+                            {
+                                <div class="deletedContent text-secondary">Comment was deleted</div>
+
+                            }
+                        }
+                        else
+                        {
+                            @if (standardComment.CommentedCommentId != rootCommentId && standardComment.CommentedCommentUserName != null)
+                            {
+                                <div class="commentContent"><span class="text-primary">@("@" + standardComment.CommentedCommentUserName)</span> @standardComment.Content</div>
+                            }
+                            else if (standardComment.CommentedCommentId != rootCommentId && standardComment.CommentedCommentUserName == null)
+                            {
+                                <div class="commentContent"><span class="text-secondary">@("@" + "[deleted]")</span> @standardComment.Content</div>
+
+                            }
+                            else
+                            {
+                                <div class="commentContent">@standardComment.Content</div>
+
+                            }
+
+                        }
+                        <div class="row commentOptions">
+                            <div class="col-12">
+                                @if (standardComment.DateUserWasRemoved == null)
+                                {
+                                    @if (Model.GetUserId() == null)
+                                    {
+                                        <img class="thumbUpIcon" width="16" height="16" src="/pictograms/thumb_up_black_24dp.svg"
+                                                                          loading="lazy" alt="@("replylike" + Model.Counter)">
+
+
+                                    }
+                                    else
+                                    {
+                                        @if (standardComment.CommentUser == null || standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Dislike)
+                                        {
+                                            <a data-toggle="tooltip" data-placement="bottom" title="Like" asp-page-handler="likeComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                               asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                               asp-route-albumId="@Model.SourceAlbumId" asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                               class="btn likeComment">
+                                                <img width="16" height="16" src="/pictograms/thumb_up_black_24dp.svg"
+                                                                                  loading="lazy" alt="@("replyLike" + Model.Counter)">
+                                            </a>
+                                        }
+                                        else if (standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Like)
+                                        {
+                                            <a data-toggle="tooltip" data-placement="bottom" title="Unlike" asp-page-handler="unlikeComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                               asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                               asp-route-albumId="@Model.SourceAlbumId" asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                               class="btn unlikeComment">
+                                                <img width="16" height="16" src="/pictograms/thumb_up_black_24dp.svg"
+                                                                                   loading="lazy" alt="@("replyUnlike" + Model.Counter)">
+
+                                            </a>
+                                        }
+                                    }
+
+                                    @if (standardComment.NumberOfLikes != null)
+                                    {
+                                        <span class="text-secondary numberOfLikes">@standardComment.NumberOfLikes</span>
+
+                                    }
+
+                                    @if (Model.GetUserId() == null)
+                                    {
+                                        <img width="16" height="16" class="thumbDownIcon" src="~/pictograms/thumb_down_black_24dp.svg"
+                                                                          loading="lazy" alt="@("replyDislike" + Model.Counter)">
+
+                                    }
+                                    else
+                                    {
+                                        @if (standardComment.CommentUser == null || standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Like)
+                                        {
+                                            <a data-toggle="tooltip" data-placement="bottom" title="Dislike" asp-page-handler="dislikeComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                               asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                                               asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                               class="btn dislikeComment">
+                                                <img width="16" height="16" src="~/pictograms/thumb_down_black_24dp.svg"
+                                                     loading="lazy" alt="@("replyDislike" + Model.Counter)"/>
+                                            </a>
+                                        }
+                                        else if (standardComment.CommentUser.ReactionType == Models.CommentUser.Reaction.Dislike)
+                                        {
+                                            <a data-toggle="tooltip" data-placement="bottom" title="Remove dislike" asp-page-handler="removeDislikeForComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId" asp-route-sourcePath="@Model.SourcePath"
+                                               asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                                               asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                               class="btn removeDislikeOnComment">
+                                                <img width="16" height="16" src="/pictograms/thumb_down_black_24dp.svg"
+                                                     loading="lazy" alt="@("replyremoveDislike" + Model.Counter)"/>
+                                            </a>
+                                        }
+                                    }
+
+
+                                    @if (standardComment.NumberOfDislikes != null)
+                                    {
+                                        <span class="text-secondary numberOfDislikes">@standardComment.NumberOfDislikes</span>
+
+                                    }
+
+
+                                }
+
+
+                                @if (Model.GetUserId() != null)
+                                {
+                                    if (standardComment.DateUserWasRemoved == null)
+                                    {
+                                        <button type="button" class="btn moreOptions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <img src="~/pictograms/more_horiz_black_24dp.svg" width="24" height="24"
+                                                 loading="lazy" alt="@("replyMoreOptions" + Model.Counter)">
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn moreOptionsForDeletedComment" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <img src="~/pictograms/more_horiz_black_24dp.svg" width="24" height="24"
+                                                 loading="lazy" alt="@("replyMoreOptions" + Model.Counter)">
+                                        </button>
+                                    }
+
+
+
+                                    <div class="dropdown-menu">
+                                        <button data-target="@("#commentReplySettings" + Model.CommentViewId)" data-toggle="modal" class="dropdown-item">Reply</button>
+                                        @if (standardComment.DateUserWasRemoved == null)
+                                        {
+                                            @if (standardComment.UserId == Model.GetUserId())
+                                            {
+                                                <button class="dropdown-item" data-target="@("#commentEditSettings" + Model.CommentViewId)" data-toggle="modal">Edit</button>
+                                            }
+                                            @if (standardComment.UserId == Model.GetUserId() || Model.GetUserId() == Model.Image.Album.GalleryOwnerId)
+                                            {
+                                                <a class="dropdown-item" asp-page-handler="deleteComment" asp-route-currentCounter="@counter" asp-route-commentViewId="@Model.CommentViewId"
+                                                   asp-route-imageId="@standardComment.ImageId" asp-route-commentId="@standardComment.CommentId"
+                                                   asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                   asp-route-albumId="@Model.SourceAlbumId" asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy">Delete</a>
+                                            }
+                                        }
+                                    </div>
+
+
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (standardComment.DateUserWasRemoved == null && Model.GetUserId() == standardComment.UserId)
+                    {
+                        <div id="@("commentEditSettings" + Model.CommentViewId)" aria-labelledby="@("commentEditSettings" + Model.CommentViewId + "Label")"
+                             class="modal fade editModal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 id="@("commentEditSettings" + Model.CommentViewId + "Label")" class="modal-title">Edit your chosen comment</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="alert alert-info">
+
+                                            <em>If you want to view full content of comment, </em><b>click on it.</b>
+                                        </div>
+                                        <hr />
+                                        @if (TempData["CommentStateSuccessMessage"] != null && Model.ChosenCommentIndex == counter)
+                                        {
+                                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                @TempData["CommentStateSuccessMessage"]
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        }
+                                        else if (TempData["CommentStateErrorMessage"] != null && Model.ChosenCommentIndex == counter)
+                                        {
+                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                @TempData["CommentStateErrorMessage"]
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        }
+
+                                        <form method="post">
+
+                                            <div class="editBox">
+                                                @if (Model.CurrentUser.ProfileImageSize != null)
+                                                {
+                                                    <img class="rounded-circle"
+                                                         src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = Model.CurrentUser.Email, type = "1" })" width="40" height="40"
+                                                         loading="lazy" alt="@("replyBigProfileImageEdit" + Model.Counter)">
+
+                                                }
+                                                else
+                                                {
+                                                    <img class="rounded-circle"
+                                                         src="~/pictograms/bigDefaultProfileImage.jpg" width="40" height="40"
+                                                         loading="lazy" alt="@("replyBigProfileImageGenericEdit" + Model.Counter)">
+                                                }
+
+                                                <textarea asp-for="@standardComment.Content" name="content" placeholder="Add a public comment..."
+                                                          class="textarea"></textarea>
+
+                                            </div>
+                                            <div class="flexBasedColumn">
+                                                <input type="submit" class="btn btn-danger" asp-page-handler="restoreComment" asp-route-imageId="@Model.Image.ImageId"
+                                                       asp-route-sourcePath="@Model.SourcePath" asp-route-commentViewId="@Model.CommentViewId" asp-route-chosenCommentIndex="@counter"
+                                                       asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-albumId="@Model.SourceAlbumId"
+                                                       asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" value="Cancel" />
+
+                                                <input class="btn btn-success" type="submit" value="Save" asp-page-handler="editComment" asp-route-imageId="@Model.Image.ImageId"
+                                                       asp-route-sourcePath="@Model.SourcePath" asp-route-commentViewId="@Model.CommentViewId" asp-route-commentId="@standardComment.CommentId"
+                                                       asp-route-chosenCommentIndex="@counter"
+                                                       asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                       asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy" asp-route-albumId="@Model.SourceAlbumId" />
+
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="alert alert-info single">
+                                            <a asp-page-handler="moveToChosenComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId"
+                                               asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                               asp-route-albumId="@Model.SourceAlbumId"
+                                               asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                               data-toggle="tooltip" data-placement="top"
+                                               title="Move to this specific comment."><em>Order of your comment:</em> <b>@(counter)th</b></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.GetUserId() != null)
+                    {
+                        <div id="@("commentReplySettings" + Model.CommentViewId)" aria-labelledby="@("commentReplySettings" + Model.CommentViewId + "Label")"
+                             class="modal fade replyModal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        @if (standardComment.DateUserWasRemoved == null)
+                                        {
+                                            <h5 id="@("commentReplySettings" + Model.CommentViewId + "Label")" class="modal-title">Reply to @(standardComment.User.UserNameForComments)'s comment</h5>
+
+                                        }
+                                        else
+                                        {
+                                            <h5 id="@("commentReplySettings" + Model.CommentViewId + "Label")" class="modal-title">Reply to deleted comment</h5>
+
+                                        }
+
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        @if (TempData["CommentStateSuccessMessage"] != null && Model.ChosenReplyIndex == counter)
+                                        {
+                                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                @TempData["CommentStateSuccessMessage"]
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        }
+                                        else if (TempData["CommentStateErrorMessage"] != null && Model.ChosenReplyIndex == counter)
+                                        {
+                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                @TempData["CommentStateErrorMessage"]
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        }
+                                        <form method="post">
+
+                                            <div class="editBox">
+                                                @if (Model.CurrentUser.ProfileImageSize != null)
+                                                {
+                                                    <img class="rounded-circle"
+                                                         src="@Url.Page("/ImageComments", "ProfileImageThumbnail", new { userEmail = Model.CurrentUser.Email, type = "1" })" width="40" height="40"
+                                                         alt="@("replyBigProfileImageReply" + Model.Counter)" loading="lazy">
+
+                                                }
+                                                else
+                                                {
+                                                    <img class="rounded-circle"
+                                                         src="~/pictograms/bigDefaultProfileImage.jpg" width="40" height="40"
+                                                         alt="@("replyBigProfileImageReplyGeneric" + Model.Counter)" loading="lazy">
+                                                }
+                                                <textarea asp-for="@Model.Reply.Content" placeholder="Add a public reply..." class="textarea" role="textbox"></textarea>
+
+                                            </div>
+                                            <div class="flexBasedColumn">
+                                                <input class="btn btn-danger" asp-page-handler="restoreComment" asp-route-imageId="@Model.Image.ImageId"
+                                                       asp-route-sourcePath="@Model.SourcePath" asp-route-commentViewId="@Model.CommentViewId" asp-route-isReply="@true" asp-route-chosenCommentIndex="@counter"
+                                                       asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                                       asp-route-albumId="@Model.SourceAlbumId" type="submit" asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                                       value="Cancel" />
+
+                                                <input class="btn btn-primary" type="submit" value="Reply"
+                                                       asp-page-handler="createComment" asp-route-userId="@Model.GetUserId()" asp-route-currentCounter="@counter"
+                                                       asp-route-imageId="@Model.Image.ImageId" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail" asp-route-parentCommentViewId="@Model.CommentViewId"
+                                                       asp-route-albumId="@Model.SourceAlbumId" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-parentCommentId="@standardComment.CommentId"
+                                                       asp-route-isReply="@true" asp-route-sourcePath="@Model.SourcePath" asp-route-commentsMethod="@Model.CommentsMethod"
+                                                       asp-route-commentsOrderBy="@Model.CommentsOrderBy" />
+
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="alert alert-info single">
+                                            <a asp-page-handler="moveToChosenComment" asp-route-commentViewId="@Model.CommentViewId" asp-route-imageId="@standardComment.ImageId"
+                                               asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                               asp-route-albumId="@Model.SourceAlbumId"
+                                               asp-route-commentsMethod="@Model.CommentsMethod" asp-route-commentsOrderBy="@Model.CommentsOrderBy"
+                                               data-toggle="tooltip" data-placement="top"
+                                               title="Move to this specific comment.">
+                                                @if (standardComment.DateUserWasRemoved == null)
+                                                {
+                                                    <em>Order of @(standardComment.User.UserNameForComments)'s comment:</em>
+                                                }
+                                                else
+                                                {
+                                                    <em>Order of deleted comment:</em>
+                                                }
+                                                <b>@(counter)th</b>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </li>
+            counter++;
+            Model.Replies = Model.GetCommentReplies(standardComment.CommentId);
+
+            @if (Model.Replies.Any())
+            {
+                await ShowCommentsTree(Model.Replies, counter);
+            }
+
+            if (Model.PreviousLevelCounter != 0)
+            {
+                counter = Model.PreviousLevelCounter;
+                Model.PreviousLevelCounter = 0;
+            }
+        }
+
+        Model.PreviousLevelCounter = counter;
+    }
+}

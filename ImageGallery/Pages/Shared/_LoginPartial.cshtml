@@ -1,0 +1,59 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using GalleryDatabase.Models
+
+@inject SignInManager<GalleryOwner> signInManager
+@inject UserManager<GalleryOwner> userManager
+
+<ul id="layoutLoginNavbar" class="navbar-nav">
+    @if (signInManager.IsSignedIn(User))
+    {
+        var user = await userManager.GetUserAsync(User);
+
+        <li class="nav-item">
+            <a id="manage" data-toggle="tooltip" data-placement="bottom" title="This allows you to customize your account."
+               class="text-dark btn btn-outline-secondary" asp-area="Identity" asp-page="/Account/Manage/Index">
+                @if (user == null)
+                {
+                    <img src="/pictograms/account_circle_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="manageIcon" />
+
+                }
+                else if (user.ProfileImageSize == null)
+                {
+                    <img src="/pictograms/account_circle_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="manageIcon" />
+
+                }
+                else
+                {
+                    var encodedImage = String.Format("data:{0};base64, {1}", "image/" + user.ThumbnailContentType.ToLower(), Convert.ToBase64String(user.ThumbnailForCommentedCommentBlob));
+
+                    <img src="@encodedImage" width="25" height="25" class="d-inline-block align-top rounded-circle" alt="manageIcon" />
+                }
+                Account
+            </a>
+        </li>
+        <li class="nav-item">
+            <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                <button class="text-dark btn btn-outline-secondary" id="logout" type="submit">
+                    <img src="/pictograms/logout_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="logoutIcon" />
+                    Logout
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a id="register" data-toggle="tooltip" data-placement="bottom" title="You can register normally or use google account."
+               class="text-dark btn btn-outline-secondary" asp-area="Identity" asp-page="/Account/Register">
+                <img src="/pictograms/person_add_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="registerIcon" />
+                Register
+            </a>
+        </li>
+        <li class="nav-item">
+            <a id="login" class="text-dark btn btn-outline-secondary" asp-area="Identity" asp-page="/Account/Login">
+                <img src="/pictograms/login_black_24dp.svg" width="25" height="25" class="d-inline-block align-top" alt="loginIcon" />
+                Login
+            </a>
+        </li>
+    }
+</ul>

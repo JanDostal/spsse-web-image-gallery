@@ -1,0 +1,213 @@
+﻿@page
+@model GalleryDatabase.Pages.MyAlbumModel
+@{
+    ViewData["Title"] = "Album " + Model.Album.Name;
+}
+
+<header>
+    <div class="jumbotron pageInfoHeader">
+        <h1 class="display-4">Welcome to your chosen album, @Model.GalleryOwner.Email</h1>
+        <button class="btn btn-primary btn-block d-lg-none" type="button" data-toggle="collapse" data-target="#collapse" aria-expanded="false" aria-controls="collapse">
+            Show/Hide More Info
+        </button>
+        <div id="collapse" class="collapse pagesHeaders">
+            <ul class="list-group list-group-horizontal-lg">
+                <li class="d-flex flex-column list-group-item">
+                    <h6>
+                        <em>Current total size of album:</em>
+                    </h6>
+                    <br /> <b data-toggle="tooltip" data-placement="top" title="@(Model.CurrentAlbumSize / (double)1000000) MB">
+                        @Math.Round(Model.CurrentAlbumSize / (double)1000000, 3) MB
+                    </b><br />
+                    <h6><em>Date created:</em></h6> <br /> <b data-toggle="tooltip" data-placement="top" title="@Model.Album.DateCreated">@Model.Album.DateCreated.ToShortDateString()</b>
+                </li>
+                <li class="d-flex flex-column list-group-item">
+                    <h6><em>Number of images:</em></h6>
+                    <br /><b>@Model.NumberOfImages</b><br />
+                    <h6><em>Cover image:</em></h6> <br />
+                    <b>@Model.CoverImageName</b>
+                </li>
+                <li class="d-flex flex-column list-group-item">
+                    <form method="post" asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="chosenAlbumAddImages" asp-route-albumMethod="@Model.AlbumMethod"
+                          asp-route-albumOrderBy="@Model.AlbumOrderBy">
+                        <div class="form-group">
+                            <label for="listOfImages" class="control-label"><b>Add images to current album from different albums</b></label>
+                            <select id="listOfImages" multiple size="4" name="listOfImages" class="form-control" asp-items="Model.ImageList"></select>
+                        </div>
+                        <input type="submit" value="Add" class="btn btn-secondary btn-block" />
+                    </form>
+
+                </li>
+                <li class="d-flex flex-column list-group-item">
+                    <form method="post" asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="chosenAlbumSorting">
+                        <div class="form-group" data-toggle="tooltip" data-placement="top"
+                             title="Images are sorted in columns, starting from the upper left image, continuing from top to bottom along the columns">
+                            <label asp-for="AlbumMethod" class="control-label"><b>Method of sorting</b></label>
+                            <select asp-for="AlbumMethod" class="form-control" asp-items="Model.AlbumMethodOfSortingList"></select>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="AlbumOrderBy" class="control-label"><b>Order by</b></label>
+                            <select asp-for="AlbumOrderBy" class="form-control" asp-items="Model.AlbumOrderByList"></select>
+                        </div>
+                        <input type="submit" value="Sort" class="btn btn-primary btn-block" />
+                    </form>
+
+                </li>
+                <li class="d-flex flex-column list-group-item">
+
+                    <form method="post" asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="chosenAlbumAccessibility" asp-route-albumMethod="@Model.AlbumMethod"
+                          asp-route-albumOrderBy="@Model.AlbumOrderBy">
+                        <div class="form-group">
+                            <label asp-for="Album.AlbumAccessibility" class="control-label"><b>Album Accessibility</b></label>
+                            <select asp-for="Album.AlbumAccessibility" name="albumAccessibility" class="form-control" asp-items="Model.AccessibilityList"></select>
+                        </div>
+                        <input type="submit" value="Save" class="btn btn-success btn-block" />
+                    </form>
+                </li>
+
+
+
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div class="columnImageSystem">
+    @{
+
+        Model.Counter = 1;
+        foreach (var item in Model.ImagesFromService)
+        {
+            <div class="imageContainer" id="@("ownerImage" + item.ImageId)">
+                <a asp-page="/Fullscreen" asp-area="" asp-route-filename="@item.ImageId" asp-route-method="@Model.AlbumMethod"
+                   asp-route-orderBy="@Model.AlbumOrderBy" asp-route-category="allAlbumImages">
+                    <img class="imageThumbnail" width="@item.Thumbnail.ThumbnailWidth" height="@item.Thumbnail.ThumbnailHeight" loading="lazy" alt="@item.OriginalName"
+                         src="@Url.Page("/MyAlbum", "Thumbnail", new { filename = item.ImageId, type = "1", albumId = item.AlbumId})" />
+                </a>
+                <button data-target="@("#chosenAlbumSettings" + item.ImageId)" data-toggle="modal" type="button" class="btn">
+                    <img class="arrowDropdownIcon" src="/pictograms/arrow_drop_down_circle_white_36dp.svg" width="35" height="35" alt="arrowDropdownIcon" />
+                </button>
+            </div>
+            <div id="@("chosenAlbumSettings" + item.ImageId)" aria-labelledby="@("chosenAlbumSettings" + item.ImageId + "Label")" class="modal fade"
+                 tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="@("chosenAlbumSettings" + item.ImageId + "Label")" class="modal-title">@item.OriginalName</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h6><span class="label"><em>Date uploaded:</em></span> @item.UploadedAt</h6>
+                            @if (item.UploadedAt != item.DateTaken)
+                            {
+                                <h6><span class="label"><em>Date taken:</em></span> @item.DateTaken</h6>
+
+                            }
+                            <h6><span class="label"><em>Content type:</em></span> @item.ImageContentType.Remove(0, 6).ToUpper()</h6>
+                            <h6><span class="label"><em>Size:</em></span> @(item.Size / (double)1000) kB</h6>
+                            <h6><span class="label"><em>Resolution:</em></span> @item.ImageWidth × @item.ImageHeight</h6>
+
+                            @if (item.AlbumsCount == 0)
+                            {
+                                <h6><span class="label"><em>Cover image of album:</em></span> No</h6>
+
+                            }
+                            else
+                            {
+                                <h6><span class="label"><em>Cover image of album:</em></span> Yes (@item.AlbumsCount <small><em>(Number of albums)</em></small>)</h6>
+                            }
+                            <hr />
+                            @if (TempData["SaveChangesSuccessMessage"] != null && Model.ChosenImageSavedSettingsIndex == Model.Counter)
+                            {
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    @TempData["SaveChangesSuccessMessage"]
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            }
+                            <form method="post" asp-page-handler="imageDetailsSettings" asp-route-id="@item.ImageId" asp-route-albumId="@item.AlbumId" asp-route-albumMethod="@Model.AlbumMethod" 
+                      asp-route-albumOrderBy="@Model.AlbumOrderBy"
+                                  asp-route-chosenImageSavedSettingsIndex="@Model.Counter">
+                                <div class="form-group">
+                                    <label asp-for="@item.ImageAccessibility" class="control-label"><b>Accessibility</b></label>
+                                    <select asp-for="@item.ImageAccessibility" name="accessibility" class="form-control" asp-items="Model.AccessibilityList"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="@item.AlbumId" class="control-label"><b>Album</b></label>
+                                    <select asp-for="@item.AlbumId" name="chosenAlbumId" class="form-control" asp-items="Model.AlbumList"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="@("listOfAlbums" + item.ImageId)" class="control-label"><b>Set as cover image for these albums</b></label>
+                                    <select id="@("listOfAlbums" + item.ImageId)" multiple size="4" name="listOfAlbums" class="form-control" asp-items="Model.AlbumListForCoverImage">
+                                    </select>
+                                </div>
+                                <input type="submit" value="Save" class="btn btn-success btn-block" />
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="alert alert-info multipleSiblings">
+                                <a asp-page-handler="moveToChosenImage" asp-route-imageId="@item.ImageId" asp-route-albumId="@Model.Album.AlbumId"
+                                    asp-route-albumMethod="@Model.AlbumMethod" 
+                      asp-route-albumOrderBy="@Model.AlbumOrderBy"
+                                   data-toggle="tooltip" data-placement="top"
+                                   title="Move to this specific image."><em>Order of image:</em> <b>@(Model.Counter)th</b></a>
+                            </div>
+                            <a asp-route-id="@item.ImageId" asp-route-albumId="@item.AlbumId" asp-page-handler="downloadImage" class="btn btn-primary btn-block">Download</a>
+                            <a asp-route-id="@item.ImageId" asp-route-albumId="@item.AlbumId" asp-route-albumMethod="@Model.AlbumMethod" 
+                      asp-route-albumOrderBy="@Model.AlbumOrderBy" asp-page-handler="deleteImage" class="btn btn-danger btn-block">Delete</a>
+                            @if (item.ImageAccessibility == Models.Accessibility.Public)
+                            {
+                                <a asp-route-imageId="@item.ImageId" asp-route-sourcePath="@HttpContext.Request.Path.ToString()" asp-route-sourceImagePath="@("chosenAlbumSettings")"
+                                   asp-route-albumId="@Model.Album.AlbumId" asp-page="/ImageComments" class="btn btn-secondary btn-block">
+                                    @if (item.NumberOfComments == 1)
+                                    {
+                                        @(item.NumberOfComments + " Comment")
+                                    }
+                                    else
+                                    {
+                                        @(item.NumberOfComments + " Comments")
+                                    }
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            Model.Counter++;
+        }
+    }
+</div>
+
+<div class="modal fade" id="albumUploadModal" tabindex="-1" role="dialog" aria-labelledby="albumUploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="albumUploadModalLabel">New images upload</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" enctype="multipart/form-data" asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="albumUpload">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label asp-for="Upload" class="control-label"><b>Images</b></label>
+                        <input type="file" asp-for="Upload" class="form-control-file" multiple required />
+                    </div>
+                    <label asp-for="Image.ImageAccessibility" class="control-label"><b>Accessibility</b></label>
+                    <select asp-for="Image.ImageAccessibility" class="form-control" asp-items="Model.AccessibilityList"></select>
+                </div>
+                <div class="modal-footer">
+                    <input data-toggle="tooltip" data-placement="top" title="Images are uploaded to current album." type="submit" value="Upload" class="btn btn-primary btn-block" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

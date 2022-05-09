@@ -1,0 +1,147 @@
+﻿@page
+@model GalleryDatabase.Pages.ReadOnlyGalleryModel
+@{
+    ViewData["Title"] = "Public Gallery";
+}
+
+<header>
+    <div id="readOnlyGalleryJumbotron" class="jumbotron pageInfoHeader">
+        <h1 class="display-4">Welcome to @Model.GalleryOwnerReadOnly.Email's gallery</h1>
+        <button class="btn btn-primary btn-block d-md-none" type="button" data-toggle="collapse" data-target="#collapse" aria-expanded="false" aria-controls="collapse">
+            Show/Hide More Info
+        </button>
+        <div id="collapse" class="collapse readOnlyPagesHeaders">
+            <ul class="list-group list-group-horizontal-md">
+                <li class="d-flex flex-column list-group-item">
+                    <h6>
+                        <em>Current total size of gallery:</em>
+                    </h6>
+                    <br /> <b data-toggle="tooltip" data-placement="top" title="@(Model.GalleryOwnerReadOnly.CurrentGallerySize / (double)1000000) MB">
+                        @(Math.Round(Model.GalleryOwnerReadOnly.CurrentGallerySize / (double)1000000, 3)) MB
+                    </b><br />
+                    <h6><em>Date of gallery creation:</em></h6> <br /> <b data-toggle="tooltip" data-placement="top" title="@Model.GalleryOwnerReadOnly.DateCreated">
+                        @Model.GalleryOwnerReadOnly.DateCreated.ToShortDateString()
+                    </b>
+                </li>
+                <li class="d-flex flex-column list-group-item">
+                    <h6><em>Current total size of unclassified album:</em></h6> <br /> <b data-toggle="tooltip" data-placement="top" title="@(Model.DefaultAlbumTotalSize / (double)1000000) MB">
+                        @(Math.Round(Model.DefaultAlbumTotalSize / (double)1000000, 3)) MB
+                    </b><br />
+                    <h6><em>Number of images in unclassified album:</em></h6> <br /> <b>@Model.DefaultAlbumNumberOfImages</b>
+                </li>
+                <li class="d-flex flex-column list-group-item">
+                    <h6><em>Number of images in gallery:</em></h6>
+                    <br /><b>@Model.NumberOfImages</b><br />
+                    <h6><em>Number of albums in gallery:</em></h6> <br /> <b>@Model.NumberOfAlbums</b>
+                </li>
+                <li class="d-flex flex-column list-group-item">
+                    <form method="post" asp-page-handler="gallerySettings" asp-route-galleryOwnerEmail="@Model.GalleryOwnerReadOnly.Email">
+                        <div data-toggle="tooltip" data-placement="top"
+                             title="Images are sorted in columns, starting from the upper left image, continuing from top to bottom along the columns" class="form-group">
+                            <label asp-for="GalleryMethod" class="control-label"><b>Method of sorting</b></label>
+                            <select asp-for="GalleryMethod" class="form-control" asp-items="Model.GalleryMethodOfSortingList"></select>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="GalleryOrderBy" class="control-label"><b>Order by</b></label>
+                            <select asp-for="GalleryOrderBy" class="form-control" asp-items="Model.GalleryOrderByList"></select>
+                        </div>
+                        <input type="submit" value="Sort" class="btn btn-primary btn-block" />
+                    </form>
+                </li>
+            </ul>
+            </div>
+        </div>
+</header>
+<div class="columnImageSystem">
+    @{
+        Model.Counter = 1;
+        foreach (var item in Model.ImagesFromService)
+        {
+            @if (item.ImageAccessibility == Models.Accessibility.Private)
+            {
+                <img data-toggle="tooltip" data-placement="top"
+                     title="This image is restricted." class="imageThumbnail" width="1200" height="1200" loading="lazy" alt="lockedStateIcon" src="~/pictograms/lockedState.jpg" />
+            }
+            else
+            {
+
+                <div class="imageContainer" id="@("publicImage" + item.ImageId)">
+                    <a asp-page="/Fullscreen" asp-area="" asp-route-filename="@item.ImageId"
+                       asp-route-method="@Model.GalleryMethod" asp-route-orderBy="@Model.GalleryOrderBy"
+                       asp-route-category="publicAlbumImages">
+                        <img class="imageThumbnail" width="@item.Thumbnail.ThumbnailWidth"
+                             height="@item.Thumbnail.ThumbnailHeight" loading="lazy" alt="@item.OriginalName"
+                             src="@Url.Page("/ReadOnlyGallery", "Thumbnail",
+                                                                       new { filename = item.ImageId, type = "1", galleryOwnerEmail = Model.GalleryOwnerReadOnly.Email })" />
+                    </a>
+                    <button data-target="@("#publicGalleryImageDetails" + item.ImageId)" data-toggle="modal" type="button" class="btn">
+                        <img class="arrowDropdownIcon" src="/pictograms/arrow_drop_down_circle_white_36dp.svg" width="35" height="35" alt="arrowDropdownIcon" />
+                    </button>
+                </div>
+                <div id="@("publicGalleryImageDetails" + item.ImageId)" aria-labelledby="@("publicGalleryImageDetails" + item.ImageId + "Label")"
+                     class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 id="@("publicGalleryImageDetails" + item.ImageId + "Label")" class="modal-title">
+                                    @item.OriginalName
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <h6><span class="label"><em>Date uploaded:</em></span> @item.UploadedAt</h6>
+                                @if (item.UploadedAt != item.DateTaken)
+                                {
+                                    <h6><span class="label"><em>Date taken:</em></span> @item.DateTaken</h6>
+
+                                }
+                                <h6><span class="label"><em>Content type:</em></span> @item.ImageContentType.Remove(0, 6).ToUpper()</h6>
+                                <h6><span class="label"><em>Size:</em></span> @(item.Size / (double)1000) kB</h6>
+                                <h6><span class="label"><em>Resolution:</em></span> @item.ImageWidth × @item.ImageHeight</h6>
+
+                                <h6><span class="label"><em>Album:</em></span> None (Unclassified)</h6>
+
+                                @if (item.AlbumsCount == 0)
+                                {
+                                    <h6><span class="label"><em>Cover image of album:</em></span> No</h6>
+
+                                }
+                                else
+                                {
+                                    <h6><span class="label"><em>Cover image of album:</em></span> Yes (@item.AlbumsCount <small><em>(Number of albums)</em></small>)</h6>
+                                }
+                            </div>
+                            <div class="modal-footer">
+                                <div class="alert alert-info multipleSiblings">
+                                    <a asp-page-handler="moveToChosenImage" asp-route-imageId="@item.ImageId" asp-route-galleryOwnerEmail="@Model.GalleryOwnerReadOnly.Email"
+                                       asp-route-galleryMethod="@Model.GalleryMethod" asp-route-galleryOrderBy="@Model.GalleryOrderBy"
+                                       data-toggle="tooltip" data-placement="top"
+                                       title="Move to this specific image."><em>Order of image:</em> <b>@(Model.Counter)th</b></a>
+                                </div>
+                                <a asp-route-id="@item.ImageId" asp-route-galleryOwnerEmail="@Model.GalleryOwnerReadOnly.Email"
+                                   asp-page-handler="downloadUnclassifiedImage" class="btn btn-primary btn-block">Download</a>
+
+                                <a asp-route-imageId="@item.ImageId" asp-route-sourcePath="@HttpContext.Request.Path.ToString()" asp-route-sourceImagePath="@("publicGalleryImageDetails")"
+                                   asp-route-galleryOwnerEmail="@Model.GalleryOwnerReadOnly.Email" asp-page="/ImageComments" class="btn btn-secondary btn-block">
+                                    @if (item.NumberOfComments == 1)
+                                    {
+                                        @(item.NumberOfComments + " Comment")
+                                    }
+                                    else
+                                    {
+                                        @(item.NumberOfComments + " Comments")
+                                    }
+                                </a>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        }
+
+            Model.Counter++;
+
+        }
+    }
+</div>

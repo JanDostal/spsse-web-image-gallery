@@ -1,0 +1,70 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <form id="profile-form" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.UserNameForComments"></label>
+                <input asp-for="Input.UserNameForComments" class="form-control" />
+                <span asp-validation-for="Input.UserNameForComments" class="text-danger"></span>
+            </div>
+            <button id="update-profile-button" type="submit" class="btn btn-success">Save</button>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <form id="profileImageForm" method="post" enctype="multipart/form-data" asp-page-handler="profileImageUpload">
+            <div class="form-group">
+                <label asp-for="Upload" class="control-label">Profile image</label>
+                <input type="file" asp-for="Upload" class="form-control-file" required />
+            </div>
+            <input data-toggle="tooltip" data-placement="top" title="Sets up chosen image as profile image. This also replaces existing profile image with new one."
+                   type="submit" value="Upload" class="btn btn-primary" />
+            <a data-toggle="tooltip" data-placement="top" title="This downloads current profile image." asp-page-handler="downloadProfileImage" class="btn btn-secondary">Download</a>
+            <a data-toggle="tooltip" data-placement="top" title="This deletes current profile image." asp-page-handler="deleteProfileImage" class="btn btn-danger">Delete</a>
+        </form>
+    </div>
+</div>
+<div class="row">
+    @if (Model.GalleryOwner.ProfileImageSize != null)
+    {
+        <div class="col-md-6 profileImageContainer">
+            <label class="currentChosenProfileImageHeading">Current chosen image</label>
+            <img class="profileImage"
+                 loading="lazy" width="@Model.GalleryOwner.ProfileImageWidth" height="@Model.GalleryOwner.ProfileImageHeight"
+                 alt="@Model.GalleryOwner.ProfileImageOriginalName" src="@Url.Page("./Index", "profileImage")" />
+        </div>
+        <div id="profileImageInformations" class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6><span class="label"><em>Original name:</em></span> @Model.GalleryOwner.ProfileImageOriginalName</h6>
+                    <h6><span class="label"><em>Date uploaded:</em></span> @Model.GalleryOwner.ProfileImageUploadedAt</h6>
+                    <h6><span class="label"><em>Content type:</em></span> @Model.GalleryOwner.ProfileImageContentType.Remove(0, 6).ToUpper()</h6>
+                    <h6><span class="label"><em>Size:</em></span> @(Model.GalleryOwner.ProfileImageSize / (double)1000) kB</h6>
+                    <h6>
+                        <span class="label"><em>Thumbnail resolution:</em></span> @Model.GalleryOwner.ThumbnailForStandardCommentWidth × @Model.GalleryOwner.ThumbnailForStandardCommentHeight,
+                        @Model.GalleryOwner.ThumbnailForCommentedCommentWidth × @Model.GalleryOwner.ThumbnailForCommentedCommentHeight
+                    </h6>
+                    <h6 id="profileImageResolution"><span class="label"><em>Resolution:</em></span> @Model.GalleryOwner.ProfileImageWidth × @Model.GalleryOwner.ProfileImageHeight</h6>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    { <div class="col-6">
+            <label class="currentChosenProfileImageHeading">Current chosen image</label>
+            <h5 class="currentChosenProfileImageNotChosen">None</h5>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

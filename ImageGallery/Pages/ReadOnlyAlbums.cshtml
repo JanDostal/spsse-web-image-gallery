@@ -1,0 +1,146 @@
+﻿@page
+@model GalleryDatabase.Pages.ReadOnlyAlbumsModel
+@{
+    ViewData["Title"] = "Public Albums";
+}
+
+<header>
+    <div class="jumbotron pageInfoHeader" id="readOnlyAlbumsJumbotron">
+        <h1 class="display-4">These are @Model.GalleryOwner.Email's albums</h1>
+        <ul class="list-group list-group-horizontal-md">
+            <li class="d-flex flex-column list-group-item">
+                <form method="post" asp-page-handler="albumsSettings" asp-route-galleryOwnerEmail="@Model.GalleryOwner.Email">
+                    <div data-toggle="tooltip" data-placement="top"
+                         title="Albums are sorted in rows, starting from the upper left album, continuing from left to right along the rows." class="form-group">
+                        <label asp-for="AlbumsMethod" class="control-label"><b>Method of sorting</b></label>
+                        <select asp-for="AlbumsMethod" class="form-control" asp-items="Model.AlbumsMethodOfSortingList"></select>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="AlbumsOrderBy" class="control-label"><b>Order by</b></label>
+                        <select asp-for="AlbumsOrderBy" class="form-control" asp-items="Model.AlbumsOrderByList"></select>
+                    </div>
+                    <input type="submit" value="Sort" class="btn btn-primary btn-block" />
+                </form>
+            </li>
+        </ul>
+    </div>
+</header>
+<div class="row" id="publicAlbums">
+    @{
+        Model.Counter = 1;
+        @foreach (var item in Model.AlbumsFromService)
+        {
+            <div class="col-sm-4 col-md-4 col-lg-3 col-xl-2 col-6">
+                @if (item.AlbumAccessibility == Models.Accessibility.Private)
+                {
+                    <div class="card">
+                        <h5 class="card-header alert alert-danger" style="margin-bottom: 0px;">Restricted</h5>
+                        <img data-toggle="tooltip" data-placement="top"
+                             title="This album is restricted." width="1200" height="1200" class="card-img-top img-fluid rounded-0" loading="lazy" src="~/pictograms/lockedState.jpg" alt="restricted" />
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-info btn-block" disabled>Details</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="card" id="@("publicAlbum" + Model.Counter)">
+                        <h5 class="card-header">@item.Name</h5>
+                        <a class="imageLink" asp-area="" asp-page="/ReadOnlyAlbum" asp-route-albumId="@item.AlbumId">
+                            @if (item.CoverImageId == null)
+                            {
+                                <img class="card-img-top img-fluid rounded-0" width="1200" height="1200" loading="lazy" src="~/pictograms/notAvailableState.jpg" alt="notAvailableState" />
+                            }
+                            else if (item.Cover.ImageAccessibility == Models.Accessibility.Private)
+                            {
+                                <img data-toggle="tooltip" data-placement="top" title="Cover image is restricted."
+                                     class="card-img-top img-fluid rounded-0" width="1200" height="1200" loading="lazy" src="~/pictograms/lockedState.jpg" alt="restricted" />
+                            }
+                            else
+                            {
+                                <img class="card-img-top img-fluid rounded-0" width="320"
+                                     height="320" loading="lazy"
+                                     src="@Url.Page("/ReadOnlyAlbums", "Thumbnail", new { filename = item.CoverImageId, type = "0", galleryOwnerEmail = Model.GalleryOwner.Email })"
+                                     alt="albumCoverImage" />
+                            }
+                        </a>
+                        <div class="card-footer">
+                            <a data-target="@("#publicAlbumSettings" +  Model.Counter)" data-toggle="modal" class="btn btn-info btn-block">Details</a>
+                        </div>
+                    </div>
+                    
+                }
+            </div>
+            if (item.AlbumAccessibility == Models.Accessibility.Public)
+            {
+                <div id="@("publicAlbumSettings" +  Model.Counter)" aria-labelledby="@("publicAlbumSettings" +  Model.Counter + "Label")"
+                     class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 id="@("publicAlbumSettings" +  Model.Counter + "Label")" class="modal-title">Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                @if (item.ImagesSizes.Count == 0)
+                                {
+                                    <h6><span class="label"><em>Number of images:</em></span> 0</h6>
+                                    <h6><span class="label"><em>Total size of album:</em></span> 0 MB</h6>
+                                }
+                                else
+                                {
+                                    <h6><span class="label"><em>Number of images:</em></span> @item.ImagesSizes.Count</h6>
+                                    <h6><span class="label"><em>Total size of album:</em></span> @(item.ImagesSizes.Sum() / (double)1000000) MB</h6>
+
+                                }
+                                <h6><span class="label"><em>Date created:</em></span> @item.DateCreated</h6>
+
+                                @if (item.CoverImageId != null)
+                                {
+                                    if (item.Cover.ImageAccessibility == Models.Accessibility.Private)
+                                    {
+                                        <h6><span class="label"><em>Cover image:</em></span> <span class="alert alert-danger" style="padding: 2px;">Restricted</span></h6>
+
+                                    }
+                                    else
+                                    {
+                                        if (item.Cover.OriginalName.Length > 27)
+                                        {
+                                            Model.PositionOfExtension = item.Cover.OriginalName.LastIndexOf(".");
+                                            <h6>
+                                                <span class="label"><em>Cover image:</em></span> @(item.Cover.OriginalName.Substring(0,19) + "..." +
+                                             item.Cover.OriginalName.Substring(Model.PositionOfExtension - 1))
+                                            </h6>
+
+                                        }
+                                        else
+                                        {
+                                            <h6><span class="label"><em>Cover image:</em></span> @item.Cover.OriginalName</h6>
+
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <h6><span class="label"><em>Cover image:</em></span> None</h6>
+                                }
+                            </div>
+                            <div class="modal-footer">
+                                <div class="alert alert-info single">
+                                    <a asp-page-handler="moveToChosenAlbum" asp-route-albumViewId="@Model.Counter" 
+                                       asp-route-galleryOwnerEmail="@Model.GalleryOwner.Email" asp-route-albumsMethod="@Model.AlbumsMethod" asp-route-albumsOrderBy="@Model.AlbumsOrderBy"
+                                       data-toggle="tooltip" data-placement="top"
+                                       title="Move to this specific album."><em>Order of album:</em> <b>@(Model.Counter)th</b></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            Model.Counter++;
+        }
+    }
+</div>

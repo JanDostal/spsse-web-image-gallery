@@ -1,0 +1,967 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300&display=swap');
+
+/* Default css */
+a {
+    color: #0366d6;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.border-top {
+    border-top: 1px solid #e5e5e5;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+    font-size: 1rem;
+    line-height: inherit;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+    font-size: 14px;
+}
+
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    text-align: center;
+    line-height: 60px; /* Vertically center the text there */
+}
+
+/* Invidual pages headers */
+
+.homePageHeader, .commentsPageHeader {
+    padding-bottom: 5px;
+    padding-top: 5px;
+    margin-bottom: 15px;
+}
+
+.pageInfoHeader {
+    padding-bottom: 15px;
+    padding-top: 5px;
+    margin-bottom: 15px;
+}
+
+    .pageInfoHeader .display-4, .homePageHeader .display-4, .commentsPageHeader .display-4 {
+        text-align: center;
+        margin-bottom: 0px;
+        padding-bottom: 15px;
+        padding-top: 7px
+    }
+
+.pageInfoHeader ul {
+    border-radius: 0.3rem;
+    padding-top: 15px;
+}
+
+    .pageInfoHeader ul li {
+        text-align: center;
+    }
+
+        .pageInfoHeader ul li h6 ~ b {
+            border: 2px solid #000000;
+            padding: 10px;
+            border-radius: 0.3rem;
+        }
+
+/* User profile settings */
+
+#profileImageForm > .form-group {
+    margin-bottom: 28px;
+}
+
+.profileImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.3rem;
+}
+
+#profileImageInformations h6:last-child {
+    margin-bottom: 0px;
+}
+
+#profileImageForm a, #profileImageForm input, #external-account button, #socialLoginList button {
+    margin-bottom: 5px;
+}
+
+#profileImageInformations {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+}
+
+.currentChosenProfileImageHeading {
+    margin-top: 16px;
+    margin-bottom: 28px;
+    display: block;
+}
+
+.currentChosenProfileImageNotChosen {
+    border: 2px solid #000000;
+    padding: 10px;
+    border-radius: 0.3rem;
+    background-color: #e7e7e7;
+    text-align: center;
+}
+
+.userAccountNavigation {
+    margin-bottom: 16px;
+}
+
+/* Layout navbar */
+
+@media (min-width: 576px) and (max-width: 991px) {
+    #layoutNavbarHomeButton {
+        padding-left: 15px;
+    }
+
+    .layoutNavbarDropdownButton {
+        margin-right: 15px;
+    }
+}
+
+#layoutNavbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+}
+
+#layoutNavbarHomeButton {
+    opacity: 1;
+}
+
+#layoutGeneralNavbar a, #layoutLoginNavbar a, button[id="logout"] {
+    border: 2px solid #000000;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+    #layoutGeneralNavbar a:hover, #layoutLoginNavbar a:hover, button[id="logout"]:hover {
+        background-color: #e7e7e7;
+    }
+
+@media (max-width: 991px) {
+
+    #layoutGeneralNavbar a, #layoutLoginNavbar a, button[id="logout"] {
+        width: 100%;
+    }
+
+    a[id="register"], a[id="manage"] {
+        margin-top: 7px;
+        margin-bottom: 10px;
+    }
+
+    a[id="addAlbum"], a[id="gallery"], a[id="upload"], a[id="download"], a[id="deleteImages"], a[id="albums"], a[id="getFullscreen"], a[id="return"] {
+        margin-top: 10px;
+    }
+}
+
+@media (min-width: 992px) {
+
+    a[id="login"], button[id="logout"], a[id="gallery"], a[id="deleteImages"], a[id="albums"], a[id="getFullscreen"] {
+        margin-left: 10px;
+    }
+
+    a[id="upload"], a[id="addAlbum"] {
+        margin-right: 10px;
+    }
+
+    .collapse.pagesHeaders {
+        display: block;
+        height: auto !important;
+        visibility: visible;
+    }
+}
+
+#layoutNavbarHomeButton:hover {
+    opacity: 0.4;
+}
+
+#layoutGeneralNavbar {
+    display: flex;
+    justify-content: center;
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    #downloadMyAlbum a, #galleryMyAlbum a {
+        margin-right: 10px;
+    }
+
+    #uploadMyAlbum a {
+        margin-left: 10px;
+    }
+
+    #deleteMyAlbum a {
+        margin-left: 0px;
+    }
+}
+
+/* Image, album and gallery layout system */
+
+.columnImageSystem {
+    display: inline-block;
+    -webkit-column-count: 5;
+    -webkit-column-gap: 15px;
+    -moz-column-count: 5;
+    -moz-column-gap: 15px;
+    column-count: 5;
+    column-gap: 15px;
+}
+
+    .columnImageSystem .imageContainer, .columnImageSystem > .imageThumbnail {
+        margin-bottom: 15px;
+    }
+
+.imageContainer:hover > button {
+    visibility: visible;
+}
+
+.imageContainer > button:hover {
+    opacity: 1;
+}
+
+@media (max-width: 1000px) {
+    .columnImageSystem {
+        -moz-column-count: 4;
+        -webkit-column-count: 4;
+        column-count: 4;
+    }
+}
+
+@media (max-width: 800px) {
+    .columnImageSystem {
+        -moz-column-count: 3;
+        -webkit-column-count: 3;
+        column-count: 3;
+    }
+}
+
+@media (max-width: 400px) {
+    .columnImageSystem {
+        -moz-column-count: 2;
+        -webkit-column-count: 2;
+        column-count: 2;
+    }
+}
+
+.imageContainer {
+    position: relative;
+}
+
+.imageThumbnail {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 0.3rem;
+}
+
+.imageContainer:hover, .imageLink:hover, .homePageGalleryLink:hover {
+    background-color: black;
+}
+
+.imageContainer:hover {
+    border-radius: 0.3rem;
+}
+
+.imageContainer:target {
+    scroll-margin-top: 50vh;
+    background-color: black;
+    border-radius: 0.3rem;
+}
+
+    .imageContainer:target .imageThumbnail, .imageContainer:hover .imageThumbnail, .imageLink:hover > img, .homePageGalleryLink:hover > img {
+        opacity: 0.6;
+    }
+
+.imageContainer:target > button  {
+    visibility: visible;
+}
+
+#publicAlbums .card:target, #homepageAlbums .card:target, #homepageGalleries .card:target, #ownerAlbums .card:target {
+    background-color: #d1ecf1;
+    scroll-margin-top: 50vh;
+}
+
+.arrowDropdownIcon {
+    position: absolute;
+}
+
+.imageContainer > button {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    padding: 0;
+    border: 0;
+    opacity: 0.6;
+    visibility: hidden;
+}
+
+.imageContainer > button:focus, .imageContainer > button:active {
+    outline: none !important;
+    box-shadow: none;
+}
+
+#homepageAlbums .card > h5, #homepageGalleries .card > h5, #ownerAlbums .card > h5, #publicAlbums .card > h5 {
+    text-align: center;
+    overflow: auto;
+    height: 97px;
+}
+
+#homepageImages > div.col-sm-4, #homepageAlbums > div.col-sm-4, #homepageGalleries > div.col-sm-4,
+#publicAlbums > div.col-sm-4, #ownerAlbums > div.col-sm-4 {
+    padding-left: 0px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+}
+
+#homepageImages, #homepageAlbums, #homepageGalleries, #publicAlbums, #ownerAlbums {
+    padding-left: 15px;
+}
+
+/* Fullscreen carousel */
+
+.carousel-indicators {
+    margin-bottom: 20px;
+    padding: 10px 20px 10px 20px;
+    opacity: 0.8;
+    border-bottom-left-radius: 0.3rem;
+    border-bottom-right-radius: 0.3rem;
+    background-color: black;
+}
+
+.carousel-caption h5 {
+    margin-bottom: 0px;
+}
+
+#carouselFullscreenContainer:hover #previousImage, #carouselFullscreenContainer:hover #nextImage,
+#carouselFullscreenContainer:hover .carousel-indicators, #carouselFullscreenContainer:hover .carousel-caption {
+    visibility: visible;
+}
+
+.carousel-item > img {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: 100%;
+    max-height: 100%;
+    transform: translate(-50%, -50%);
+}
+
+.carousel-item {
+    height: 100vh;
+    position: relative;
+}
+
+.carousel-control-next-icon, .carousel-control-prev-icon {
+    padding: 15px;
+    background-color: black;
+}
+
+.carousel-caption {
+    background-color: black;
+    border-top-left-radius: 0.3rem;
+    border-top-right-radius: 0.3rem;
+    opacity: 0.8;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 42px;
+}
+
+#previousImage, #nextImage {
+    width: 75px;
+}
+
+#carouselFullscreenContainer #previousImage, #carouselFullscreenContainer #nextImage, #carouselFullscreenContainer .carousel-indicators, #carouselFullscreenContainer .carousel-caption {
+    visibility: hidden;
+}
+
+/* Common pages elements */
+
+#mainContainer {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 80px;
+}
+
+.mainContent {
+    padding-bottom: 15px;
+}
+
+
+.modal-body, .modal-header > h5 {
+    overflow-wrap: break-word;
+    overflow: auto;
+}
+
+.modal-footer {
+    word-break: break-word;
+}
+
+    .modal-footer .multipleSiblings {
+        width: 100%;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .modal-footer .single {
+        width: 100%;
+        text-align: center;
+    }
+
+        .modal-footer .alert.alert-info a {
+            color: #0c5460;
+        }
+
+select {
+    overflow-x: auto;
+}
+
+.label {
+    font-weight: normal;
+}
+
+@media (max-width: 767px) {
+    .pageInfoHeader .display-4, .homePageHeader .display-4, .commentsPageHeader .display-4 {
+        font-size: 8vw;
+        overflow-wrap: break-word;
+        overflow: auto;
+    }
+
+    /* User profile settings */
+    #update-profile-button {
+        margin-bottom: 7px;
+    }
+
+    .profileImageContainer {
+        margin-bottom: 16px;
+    }
+
+    /* Image, album and gallery layout system */
+    .externalLoginsContainer {
+        margin-top: 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    /* Default css */
+    html {
+        font-size: 16px;
+    }
+
+    /* Invidual pages headers */
+
+    .pageInfoHeader ul {
+        display: flex;
+    }
+
+    #albumsJumbotron ul, #readOnlyGalleryJumbotron ul, #readOnlyAlbumsJumbotron ul {
+        justify-content: center;
+    }
+
+    #albumHeaderFlex li {
+        flex-grow: 1;
+    }
+
+    .pageInfoHeader li {
+        justify-content: flex-end;
+    }
+
+    .collapse.readOnlyPagesHeaders {
+        display: block;
+        height: auto !important;
+        visibility: visible;
+    }
+}
+
+/* Image comments page */
+
+.btn.reply, .btn.replyForDeletedComment {
+    opacity: 0.8;
+}
+
+    .btn.reply:hover, .btn.replyForDeletedComment:hover, .btn.moreOptions:hover, .btn.moreOptionsForDeletedComment:hover, .btn.dislikeComment:hover, .btn.likeComment:hover {
+        opacity: 1;
+    }
+
+
+.btn.dislikeComment, .btn.likeComment, .thumbIcon, .thumbDownIcon, .thumbUpIcon, .btn.moreOptions, .btn.moreOptionsForDeletedComment {
+    opacity: 0.6;
+}
+
+
+
+.btn.unlikeComment, .btn.removeDislikeOnComment {
+    filter: invert(20%) sepia(101%) saturate(2878%) hue-rotate(546deg) brightness(90%) contrast(157%);
+}
+
+
+    .btn.unlikeComment:hover, .btn.removeDislikeOnComment:hover {
+        filter: brightness(0%);
+    }
+
+    .btn.moreOptions:focus, .btn.moreOptions:active, .btn.moreOptionsForDeletedComment:focus, .btn.moreOptionsForDeletedComment:active, .btn.reply:active, 
+    .btn.reply:focus, .btn.replyForDeletedComment:active, .btn.replyForDeletedComment:focus, .btn.dislikeComment:focus, .btn.dislikeComment:active, .btn.likeComment:focus, .btn.likeComment:active, 
+    .btn.unlikeComment:active, .btn.unlikeComment:focus, .btn.removeDislikeOnComment:active, .btn.removeDislikeOnComment:focus {
+        outline: none !important;
+        box-shadow: none;
+    }
+
+.writeCommentSection textarea, .commentsContainer textarea {
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-radius: 0px;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0px 0px 5px 0px;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    resize: none;
+    height: 26px;
+    line-height: 21px;
+}
+
+    .writeCommentSection textarea:focus, .commentsContainer textarea:focus {
+        outline: none;
+        border-bottom: 2px solid #000000;
+    }
+
+.flexBasedColumn {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+    .flexBasedColumn input {
+        margin-top: 10px;
+    }
+
+.commentsContainer > .row > .col-md-12 > ul, .commentsContainer > .row > .col-md-12 > ul > li > ul {
+    padding-left: 0px;
+    list-style-type: none;
+}
+
+.commentsContainer .modal.fade {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    padding-right: 17px;
+}
+
+
+    .commentsContainer .modal.fade > .modal-dialog {
+        margin-top: 80px;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+
+
+@media (min-width: 576px) {
+
+    .commentsContainer .modal.fade > .modal-dialog {
+        max-width: 540px;
+    }
+
+    .commentsContainer .standardComment .editModal .modal-body {
+        padding-right: 14px;
+        padding-left: 14px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .commentsContainer .replyModal .modal-body {
+        padding-right: 55px;
+        padding-left: 15px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .commentsContainer .replyComment .editModal .modal-body {
+        padding: 15px;
+    }
+
+        .commentsContainer .replyComment .editModal .modal-body form .editBox {
+            padding-right: 40px;
+        }
+
+    .commentsContainer .replyModal .modal-header, .commentsContainer .replyComment .editModal .modal-header, .commentsContainer .replyModal .close, .commentsContainer .replyComment .editModal .close,
+    .commentsContainer .standardComment .editModal .close, .commentsContainer .standardComment .editModal .modal-header {
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+
+    .commentsContainer .replyModal .modal-footer, .commentsContainer .replyComment .editModal .modal-footer, .commentsContainer .standardComment .editModal .modal-footer {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+}
+
+@media (min-width: 768px) {
+
+    .commentsContainer .modal.fade > .modal-dialog {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+
+    .commentsContainer .modal.fade > .modal-dialog {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+
+    .commentsContainer .modal.fade > .modal-dialog {
+        max-width: 1140px;
+    }
+}
+
+
+@media (max-width: 575px) {
+    .commentsContainer .modal-dialog {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+
+    .commentsContainer .standardComment .editModal .modal-body {
+        padding-right: 5.5px;
+        padding-left: 5.5px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+
+
+    .commentsContainer .replyModal .modal-body {
+        padding-right: 38px;
+        padding-left: 15px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+
+    .commentsContainer .replyComment .editModal .modal-body {
+        padding: 15px;
+    }
+
+        .commentsContainer .replyComment .editModal .modal-body form .editBox {
+            padding-right: 23px;
+        }
+
+
+        .commentsContainer .standardComment .editModal .modal-body .alert,
+        .commentsContainer .replyModal .modal-body .alert,
+        .commentsContainer .replyComment .editModal .modal-body .alert {
+            border: 0;
+        }
+
+    .commentsContainer .standardComment .editModal .modal-header,
+    .commentsContainer .replyModal .modal-header,
+    .commentsContainer .replyComment .editModal .modal-header {
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+
+
+    .commentsContainer .standardComment .editModal .modal-footer {
+        padding-right: 2px;
+        padding-left: 2px;
+    }
+
+    .commentsContainer .replyModal .modal-footer, .commentsContainer .replyComment .editModal .modal-footer {
+        padding-right: 10.5px;
+        padding-left: 10.5px;
+    }
+}
+
+.writeCommentSection form, .commentsContainer form {
+    width: 100%;
+}
+
+.commentsContainer :target .commentHeading a, .commentsContainer :target .commentHeading p, .commentsContainer :target .commentHeading span {
+    background-color: #d1ecf1;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 0.3rem;
+}
+
+.commentsContainer :target {
+    scroll-margin-top: 50vh;
+}
+
+.commentingRestriction {
+    width: 100%;
+    text-align: center;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.writeCommentSection form,
+.commentsContainer > .row > .col-md-12 > ul {
+    margin-bottom: 16px;
+}
+
+.commentsContainer {
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: 16px;
+}
+
+    .commentsContainer .orderBy {
+        margin-bottom: 0px;
+    }
+
+    .commentsContainer .methodOfSorting {
+        margin-bottom: 0px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .commentsContainer .sortingSubmitButton {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .commentsContainer .standardComment {
+        display: flex;
+        flex-direction: row;
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-top: 16px;
+    }
+
+    .commentsContainer ul li ul .replyComment {
+        display: flex;
+        flex-direction: row;
+        margin-left: 65px;
+        margin-top: 8px;
+        padding: 0px;
+        margin-right: 15px;
+    }
+
+    .commentsContainer ul li ul li:first-child .replyComment {
+        margin-top: 16px;
+    }
+
+    .commentsContainer .standardComment .comment-body .commentHeading, .commentsContainer .replyComment .comment-body .commentHeading {
+        word-break: break-word;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+        .commentsContainer .standardComment .comment-body .commentHeading a,
+        .commentsContainer .standardComment .comment-body .commentHeading span,
+        .commentsContainer .replyComment .comment-body .commentHeading span,
+        .commentsContainer .replyComment .comment-body .commentHeading a {
+            margin-bottom: 2px;
+        }
+
+        .commentsContainer .standardComment .comment-body .headingDeleted, .commentsContainer .replyComment .comment-body .headingDeleted {
+            margin-right: 4px;
+            font-family: sans-serif;
+            font-size: 13px;
+            line-height: 18px;
+        }
+
+    .commentsContainer .standardComment .comment-body .greyTimeDifference, .commentsContainer .replyComment .comment-body .greyTimeDifference {
+        line-height: 18px;
+        font-family: sans-serif;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .commentsContainer .standardComment .comment-body .commentAuthorRelationToImage, .commentsContainer .replyComment .comment-body .commentAuthorRelationToImage {
+        word-break: break-word;
+        padding-left: 15px;
+        padding-right: 15px;
+        margin-bottom: 2px;
+    }
+
+        .commentsContainer .standardComment .comment-body .commentAuthorRelationToImage span, .commentsContainer .replyComment .comment-body .commentAuthorRelationToImage span {
+            background-color: #e6e6e6;
+            border-radius: 0.3rem;
+            padding: 2px;
+            padding-left: 4px;
+            padding-right: 4px;
+            font-family: sans-serif;
+            font-weight: 500;
+            margin-bottom: 0px;
+            font-size: 13px;
+            line-height: 18px;
+        }
+
+    .commentsContainer .standardComment .comment-body .commentHeading a, .commentsContainer .replyComment .comment-body .commentHeading a {
+        margin-right: 4px;
+        color: #212529;
+        font-family: sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        line-height: 18px;
+    }
+
+    .commentsContainer .standardComment .comment-body .deletedContent, .commentsContainer .replyComment .comment-body .deletedContent,
+    .commentsContainer .standardComment .comment-body .commentContent, .commentsContainer .replyComment .comment-body .commentContent {
+        font-family: Arial;
+        word-break: break-word;
+        white-space: pre-wrap;
+        font-size: 15px;
+        line-height: 21px;
+        min-height: 18px;
+    }
+
+.thumbUpIcon {
+    margin-right: 3px;
+    margin-bottom: 0px;
+}
+
+.thumbDownIcon {
+    margin-left: 8px;
+    margin-bottom: 0px;
+}
+
+.commentsContainer .standardComment .comment-body .commentOptions, .commentsContainer .replyComment .comment-body .commentOptions {
+    margin-top: 2px;
+}
+
+.commentsContainer .standardComment .comment-body .btn.likeComment, .commentsContainer .replyComment .comment-body .btn.likeComment,
+.commentsContainer .standardComment .comment-body .btn.removeDislikeOnComment, .commentsContainer .replyComment .comment-body .btn.removeDislikeOnComment,
+.commentsContainer .standardComment .comment-body .btn.unlikeComment, .commentsContainer .replyComment .comment-body .btn.unlikeComment,
+.commentsContainer .standardComment .comment-body .btn.dislikeComment, .commentsContainer .replyComment .comment-body .btn.dislikeComment {
+    padding: 0px;
+    padding-bottom: 4px;
+}
+
+    .commentsContainer .standardComment .comment-body .btn.unlikeComment img, .commentsContainer .replyComment .comment-body .btn.unlikeComment img,
+    .commentsContainer .standardComment .comment-body .btn.likeComment img, .commentsContainer .replyComment .comment-body .btn.likeComment img {
+        margin-right: 3px;
+    }
+
+    .commentsContainer .standardComment .comment-body .btn.removeDislikeOnComment img, .commentsContainer .replyComment .comment-body .btn.removeDislikeOnComment img,
+    .commentsContainer .standardComment .comment-body .btn.dislikeComment img, .commentsContainer .replyComment .comment-body .btn.dislikeComment img {
+        margin-left: 8px;
+    }
+
+.commentsContainer .standardComment .comment-body .numberOfDislikes, .commentsContainer .replyComment .comment-body .numberOfDislikes {
+    line-height: 18px;
+    font-family: Arial;
+    font-size: 13px;
+    margin-bottom: 0px;
+    margin-left: 3px;
+}
+
+.commentsContainer .standardComment .comment-body .numberOfLikes, .commentsContainer .replyComment .comment-body .numberOfLikes {
+    line-height: 18px;
+    font-family: Arial;
+    font-size: 13px;
+    margin-bottom: 0px;
+}
+
+.commentsContainer .standardComment .btn.reply {
+    line-height: 18px;
+    margin-left: 18px;
+    padding: 0px;
+    font-family: Arial;
+    font-size: 13px;
+    margin-bottom: 0px;
+    color: #606060;
+    font-weight: 600;
+}
+
+.commentsContainer .standardComment .btn.replyForDeletedComment {
+    line-height: 18px;
+    padding: 0px;
+    font-family: Arial;
+    font-size: 13px;
+    margin-bottom: 0px;
+    color: #606060;
+    font-weight: 600;
+}
+
+.commentsContainer .standardComment .btn.moreOptions {
+    padding-bottom: 3px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    margin-left: 4px;
+}
+
+.commentsContainer .replyComment .btn.moreOptions {
+    padding-bottom: 3px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    margin-left: 18px;
+}
+
+.commentsContainer .replyComment .btn.moreOptionsForDeletedComment {
+    padding-bottom: 3px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+}
+
+.commentsContainer .standardComment .editModal .modal-body .alert.alert-info, .commentsContainer .replyComment .editModal .modal-body .alert.alert-info {
+    width: 100%;
+    text-align: center;
+}
+
+.commentsContainer .standardComment .editModal form .editBox, .commentsContainer .standardComment .replyModal form .replyBox, .commentsContainer .replyComment .editModal form .editBox,
+.commentsContainer .replyComment .replyModal form .editBox,
+.writeCommentSection form .writeCommentBox {
+    display: flex;
+    flex-direction: row;
+}
+
+    .commentsContainer .standardComment .editModal form img, .commentsContainer .standardComment .replyModal form img, .commentsContainer .replyComment .editModal form img,
+    .commentsContainer .replyComment .replyModal form img,
+    .commentsContainer .standardComment > img, .commentsContainer .replyComment > img,
+    .writeCommentSection form .writeCommentBox img {
+        align-self: flex-start;
+        justify-content: flex-start;
+        margin-right: 10px;
+    }
+
+.commentsContainer .standardComment .editModal form textarea, .commentsContainer .standardComment .replyModal form textarea, .commentsContainer .replyComment .editModal form textarea,
+.commentsContainer .replyComment .replyModal form textarea,
+.writeCommentSection textarea {
+    align-self: flex-start;
+    font-size: 15px;
+    font-family: Arial
+}
+
+
+.commentsContainer .standardComment .editModal form .flexBasedColumn .btn.btn-danger,
+.commentsContainer .standardComment .replyModal form .flexBasedColumn .btn.btn-danger,
+.commentsContainer .replyComment .editModal form .flexBasedColumn .btn.btn-danger,
+.commentsContainer .replyComment .replyModal form .flexBasedColumn .btn.btn-danger,
+.writeCommentSection .flexBasedColumn a {
+    margin-right: 10px;
+}

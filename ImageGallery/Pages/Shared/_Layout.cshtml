@@ -1,0 +1,327 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using GalleryDatabase.Models
+
+@inject SignInManager<GalleryOwner> signInManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] - ImageGallery</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    @if (Context.Request.Path != "/Fullscreen")
+    {
+        <header id="layoutNavbar">
+            <nav class="navbar navbar-expand-lg navbar-toggleable navbar-light bg-white border-bottom">
+                <div class="container">
+                    <a id="layoutNavbarHomeButton" asp-area="" asp-page="/Index">
+                        <img src="/pictograms/home_black_48dp.svg" width="48" height="48" alt="homeIcon" />
+                    </a>
+                    <button class="navbar-toggler layoutNavbarDropdownButton" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-lg-inline-flex flex-md-row-reverse">
+                        <partial name="_LoginPartial" />
+                        <ul id="layoutGeneralNavbar" class="navbar-nav flex-grow-1">
+                            @switch (Context.Request.Path)
+                            {
+                                case "/MyGallery":
+
+                                    <li class="nav-item" id="uploadMyGallery">
+                                        <a id="upload" data-toggle="modal" data-target="#galleryUploadModal" class="text-dark btn btn-outline-secondary">
+                                            <img src="/pictograms/upload_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="uploadIcon" />
+                                            Upload
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom" title="This downloads only unclassified images."
+                                           class="text-dark btn btn-outline-secondary" asp-page-handler="downloadAllUnclassifiedImages">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="deleteImages" data-toggle="tooltip" data-placement="bottom" title="This deletes only unclassified images."
+                                           class="text-dark btn btn-outline-secondary" asp-page-handler="deleteAllUnclassifiedImages">
+                                            <img src="/pictograms/delete_forever_black_36dp.svg" class="d-inline-block align-top" width="25" height="25" alt="deleteIcon" />
+                                            Delete
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="albums" class="text-dark btn btn-outline-secondary" asp-area="" asp-page="/MyAlbums">
+                                            <img src="/pictograms/collections_bookmark_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="albumsIcon" />
+                                            Collection Of Albums
+                                        </a>
+                                    </li>
+                                    break;
+
+                                case "/ReadOnlyGallery":
+
+                                    <li class="nav-item" id="downloadReadOnlyGallery">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom" title="This downloads only public unclassified images."
+                                           class="text-dark btn btn-outline-secondary" asp-page-handler="downloadAllUnclassifiedImagesFromReadOnlyGallery"
+                                           asp-route-galleryOwnerEmail="@Model.GalleryOwnerReadOnly.Email">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="albums" class="text-dark btn btn-outline-secondary" asp-area=""
+                                           asp-page="/ReadOnlyAlbums" asp-route-galleryOwnerEmail="@Model.GalleryOwnerReadOnly.Email">
+                                            <img src="/pictograms/collections_bookmark_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="albumsIcon" />
+                                            Owner's Collection Of Albums
+                                        </a>
+                                    </li>
+                                    break;
+
+                                case "/MyAlbums":
+                                    <li class="nav-item">
+                                        <a id="addAlbum" data-toggle="modal" data-target="#albumModal" class="text-dark btn btn-outline-secondary">
+                                            <img src="/pictograms/library_add_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="addAlbumIcon" />
+                                            Add New Album
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom" title="This downloads images from all albums."
+                                           class="text-dark btn btn-outline-secondary" asp-page-handler="downloadAllImagesFromAlbums">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="deleteImages" data-toggle="tooltip" data-placement="bottom" title="This deletes all albums."
+                                           class="text-dark btn btn-outline-secondary" asp-page-handler="deleteAllAlbums">
+                                            <img src="/pictograms/delete_forever_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="deleteIcon" />
+                                            Delete
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="gallery" class="text-dark btn btn-outline-secondary" asp-area="" asp-page="/MyGallery">
+                                            <img src="/pictograms/photo_library_black_36dp.svg" class="d-inline-block align-top" alt="galleryIcon" width="25" height="25" />
+                                            My Gallery
+                                        </a>
+                                    </li>
+                                    break;
+
+                                case "/ReadOnlyAlbums":
+
+                                    <li class="nav-item" id="downloadReadOnlyAlbums">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom" title="This downloads public images from all albums."
+                                           class="text-dark btn btn-outline-secondary" asp-page-handler="downloadAllImagesFromReadOnlyAlbums"
+                                           asp-route-galleryOwnerEmail="@Model.GalleryOwner.Email">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="gallery" class="text-dark btn btn-outline-secondary" asp-area=""
+                                           asp-page="/ReadOnlyGallery" asp-route-galleryOwnerEmail="@Model.GalleryOwner.Email">
+                                            <img src="/pictograms/photo_library_black_36dp.svg" alt="galleryIcon" width="25" height="25" class="d-inline-block align-top" />
+                                            Owner's Gallery
+                                        </a>
+                                    </li>
+                                    break;
+
+                                case "/MyAlbum":
+                                    <li class="nav-item" id="uploadMyAlbum">
+                                        <a id="upload" data-toggle="modal" data-target="#albumUploadModal" class="text-dark btn btn-outline-secondary">
+                                            <img src="/pictograms/upload_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="uploadIcon" />
+                                            Upload
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" id="downloadMyAlbum">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom" title="This downloads all images in current album."
+                                           class="text-dark btn btn-outline-secondary" asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="downloadAllImagesFromAlbum">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" id="deleteMyAlbum">
+                                        <a id="deleteImages" data-toggle="tooltip" data-placement="bottom" title="This deletes all images in current album."
+                                           class="text-dark btn btn-outline-secondary" asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="deleteAllImagesFromAlbum">
+                                            <img src="/pictograms/delete_forever_black_36dp.svg" class="d-inline-block align-top" width="25" height="25" alt="deleteIcon" />
+                                            Delete
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="albums" class="text-dark btn btn-outline-secondary" asp-area="" asp-page="/MyAlbums">
+                                            <img src="/pictograms/collections_bookmark_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="albumsIcon" />
+                                            Collection Of Albums
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" id="galleryMyAlbum">
+                                        <a id="gallery" class="text-dark btn btn-outline-secondary" asp-area="" asp-page="/MyGallery">
+                                            <img src="/pictograms/photo_library_black_36dp.svg" class="d-inline-block align-top" alt="galleryIcon" width="25" height="25" />
+                                            My Gallery
+                                        </a>
+                                    </li>
+                                    break;
+
+                                case "/ReadOnlyAlbum":
+                                    <li class="nav-item" id="downloadReadOnlyAlbum">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom"
+                                           title="This downloads all public images in current album." class="text-dark btn btn-outline-secondary"
+                                           asp-route-albumId="@Model.Album.AlbumId" asp-page-handler="downloadAllImagesFromReadOnlyAlbum">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+                                    if (Model.GalleryOwner.GalleryAccessibility == Models.Accessibility.Public)
+                                    {
+                                        <li class="nav-item">
+                                            <a id="albums" class="text-dark btn btn-outline-secondary" asp-route-galleryOwnerEmail="@Model.GalleryOwner.Email"
+                                               asp-area="" asp-page="/ReadOnlyAlbums">
+                                                <img src="/pictograms/collections_bookmark_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="albumsIcon" />
+                                                Owner's Collection Of Albums
+                                            </a>
+                                        </li>
+                                        <li class="nav-item" id="galleryReadOnlyAlbum">
+                                            <a id="gallery" class="text-dark btn btn-outline-secondary" asp-route-galleryOwnerEmail="@Model.GalleryOwner.Email"
+                                               asp-area="" asp-page="/ReadOnlyGallery">
+                                                <img src="/pictograms/photo_library_black_36dp.svg" class="d-inline-block align-top" alt="galleryIcon" width="25" height="25" />
+                                                Owner's Gallery
+                                            </a>
+                                        </li>
+                                    }
+                                    break;
+
+                                case "/":
+                                    <li class="nav-item">
+                                        <a id="download" data-toggle="tooltip" data-placement="bottom"
+                                           title="This downloads all newest public images visible on page." class="text-dark btn btn-outline-secondary" asp-page-handler="downloadAllNewestPublicImages">
+                                            <img src="/pictograms/download_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="downloadIcon" />
+                                            Download
+                                        </a>
+                                    </li>
+
+                                    if (signInManager.IsSignedIn(User))
+                                    {
+
+                                        <li class="nav-item">
+                                            <a id="gallery" class="text-dark btn btn-outline-secondary"
+                                               asp-area="" asp-page="/MyGallery">
+                                                <img src="/pictograms/photo_library_black_36dp.svg" class="d-inline-block align-top"
+                                                     alt="galleryIcon" width="25" height="25" />
+                                                My Gallery
+                                            </a>
+                                        </li>
+                                    }
+
+                                    break;
+                                case "/ImageComments":
+                                    <li class="nav-item">
+                                        <a id="return" data-toggle="tooltip" data-placement="bottom"
+                                           title="This returns you to last location you have been." class="text-dark btn btn-outline-secondary" asp-page-handler="returnBack"
+                                           asp-route-sourcePath="@Model.SourcePath" asp-route-sourceImagePath="@Model.SourceImagePath" asp-route-galleryOwnerEmail="@Model.SourceGalleryOwnerEmail"
+                                           asp-route-albumId="@Model.SourceAlbumId" asp-route-imageId="@Model.Image.ImageId">
+                                            <img src="/pictograms/arrow_back_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="returnPosition" />
+                                            Return to last position
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a id="getFullscreen" data-toggle="tooltip" data-placement="bottom"
+                                           title="This renders discussed image on full screen." class="text-dark btn btn-outline-secondary" asp-page="/Fullscreen" asp-area=""
+                                           asp-route-filename="@Model.Image.ImageId" asp-route-category="singleImage">
+                                            <img src="/pictograms/fullscreen_black_36dp.svg" width="25" height="25" class="d-inline-block align-top" alt="fullscreenIcon" />
+                                            Fullscreen Chosen Image
+                                        </a>
+                                    </li>
+                                    if (signInManager.IsSignedIn(User))
+                                    {
+
+                                        <li class="nav-item">
+                                            <a id="gallery" class="text-dark btn btn-outline-secondary"
+                                               asp-area="" asp-page="/MyGallery">
+                                                <img src="/pictograms/photo_library_black_36dp.svg" class="d-inline-block align-top"
+                                                     alt="galleryIcon" width="25" height="25" />
+                                                My Gallery
+                                            </a>
+                                        </li>
+                                    }
+
+
+                                    break;
+                                default:
+
+                                    if (signInManager.IsSignedIn(User))
+                                    {
+
+                                        <li class="nav-item">
+                                            <a id="gallery" class="text-dark btn btn-outline-secondary"
+                                               asp-area="" asp-page="/MyGallery">
+                                                <img src="/pictograms/photo_library_black_36dp.svg" class="d-inline-block align-top"
+                                                     alt="galleryIcon" width="25" height="25" />
+                                                My Gallery
+                                            </a>
+                                        </li>
+                                    }
+
+                                    break;
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container" id="mainContainer">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]   
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+
+            @if (Context.Request.Path.ToString().Contains("/Identity") || Context.Request.Path == "/MyGallery" || Context.Request.Path == "/ReadOnlyGallery" ||
+            Context.Request.Path == "/MyAlbum" || Context.Request.Path == "/ReadOnlyAlbum")
+            {
+                <main role="main" class="mainContent">
+                    @RenderBody()
+                </main>
+            }
+            else
+            {
+                <main role="main">
+                    @RenderBody()
+                </main>
+            }
+        </div>
+
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2021 - ImageGallery, published on 6th June, made by Jan Dostál from P3
+            </div>
+        </footer>
+
+    }
+    else
+    {
+        @RenderBody()
+    }
+
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/popper.js/umd/popper.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
