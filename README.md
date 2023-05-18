@@ -1,4 +1,4 @@
-# 2020p3web-gallery-JanDostal
+# spsse-web-image-gallery
 2020p3web-gallery-JanDostal created by GitHub Classroom
 
 ## Instructions:
