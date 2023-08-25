@@ -52,7 +52,6 @@ namespace GalleryDatabase.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
-            [RegularExpression("^.+?(@pslib.cz|@pslib.cloud)$", ErrorMessage ="User must be from school organization.")]
             public string Email { get; set; }
 
             [Required]
