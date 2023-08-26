@@ -367,6 +367,8 @@ namespace GalleryDatabase.Pages
 
         public async Task<IActionResult> OnPostAlbumUpload(int albumId)
         {
+            List<Models.Image> imagesList = new List<Models.Image>();
+
             GalleryOwner = _userManager.Users.Where(x => x.Id == GetUserId()).SingleOrDefault();
 
             Album = _context.Albums.AsNoTracking().Where(x => x.GalleryOwnerId == GalleryOwner.Id && x.AlbumId == albumId).SingleOrDefault();
@@ -392,12 +394,28 @@ namespace GalleryDatabase.Pages
 
                 _context.Images.Add(image);
 
+                var tempImage = image;
+
+                image = new Models.Image
+                {
+                    Size = tempImage.Size,
+                    ImageContentType = tempImage.ImageContentType,
+                    OriginalName = tempImage.OriginalName,
+                    AlbumId = Album.AlbumId,
+                    ImageAccessibility = tempImage.ImageAccessibility,
+                    UploadedAt = tempImage.UploadedAt,
+                    ImageId = tempImage.ImageId
+                };
+
+                _context.Images.Remove(tempImage);
+
+                imagesList.Add(image);
+
                 try
                 {
                     if (image.ImageContentType.Contains("xml") == true || image.ImageContentType.StartsWith("image") == false || image.Size == 0)
                     {
-                        _context.Images.Remove(image);
-                        await _context.SaveChangesAsync();
+                        imagesList.Remove(image);
                         throw new Exception();
                     }
 
@@ -469,9 +487,6 @@ namespace GalleryDatabase.Pages
                         image.DateTaken = DateTime.ParseExact(result.ExifProfile.GetValue(ExifTag.DateTimeOriginal).Value, "yyyy:MM:dd HH:mm:ss", CultureInfo.InvariantCulture);
                     }
 
-                    await _userManager.UpdateAsync(GalleryOwner);
-
-
                     using (pic = SixLabors.ImageSharp.Image.Load(ims.ToArray()))
                     {
                         if (pic.Width > pic.Height)
@@ -522,8 +537,6 @@ namespace GalleryDatabase.Pages
                         });
                     }
 
-                    _context.Images.Update(image);
-                    await _context.SaveChangesAsync();
                     successfulProcessing++;
                 }
                 catch
@@ -533,6 +546,12 @@ namespace GalleryDatabase.Pages
                     failedProcessing++;
                 }
             }
+
+            _context.Images.AddRange(imagesList);
+
+            await _context.SaveChangesAsync();
+
+
             if (failedProcessing == 0)
             {
                 SuccessMessage = "All images has been uploaded successfuly.";
