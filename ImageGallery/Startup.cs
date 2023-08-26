@@ -54,14 +54,14 @@ namespace GalleryDatabase
                     options.ClientSecret = googleAuthNSection["ClientSecret"];
                     options.AccessDeniedPath = "/Identity/Account/ExternalLoginFailed";
                 })
-                .AddMicrosoftAccount(options =>
-                 {
-                     options.ClientId = Configuration["Authentication:Microsoft:ClientId"];
-                     options.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
-                     options.AccessDeniedPath = "/Identity/Account/ExternalLoginFailed";
-                     options.AuthorizationEndpoint = "https://login.microsoftonline.com/e7bf04a2-63c8-4a47-a0bd-28d0aa88f6ec/oauth2/v2.0/authorize";
-                     options.TokenEndpoint = "https://login.microsoftonline.com/e7bf04a2-63c8-4a47-a0bd-28d0aa88f6ec/oauth2/v2.0/token";
-                 });
+                .AddFacebook(options =>
+                {
+                    IConfigurationSection FBAuthNSection =
+                    Configuration.GetSection("Authentication:Facebook");
+                    options.AppId = FBAuthNSection["AppId"];
+                    options.AppSecret = FBAuthNSection["AppSecret"];
+                    options.AccessDeniedPath = "/Identity/Account/ExternalLoginFailed";
+                });
 
             services.AddRazorPages();
         }
