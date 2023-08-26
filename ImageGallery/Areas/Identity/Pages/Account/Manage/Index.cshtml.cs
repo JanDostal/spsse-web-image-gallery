@@ -150,18 +150,11 @@ namespace GalleryDatabase.Areas.Identity.Pages.Account.Manage
             GalleryOwner.ProfileImageOriginalName = Upload.FileName;
             GalleryOwner.ProfileImageUploadedAt = DateTime.Now;
 
-            await _userManager.UpdateAsync(GalleryOwner);
-
             try
             {
-                if (GalleryOwner.ProfileImageContentType.Contains("xml") == true || GalleryOwner.ProfileImageContentType.StartsWith("image") == false ||
-                    GalleryOwner.ProfileImageSize == null)
+                if (Upload.ContentType.Contains("xml") == true || Upload.ContentType.StartsWith("image") == false ||
+                    Upload.Length == 0)
                 {
-                    GalleryOwner.ProfileImageSize = null;
-                    GalleryOwner.ProfileImageContentType = null;
-                    GalleryOwner.ProfileImageOriginalName = null;
-                    GalleryOwner.ProfileImageUploadedAt = null;
-                    await _userManager.UpdateAsync(GalleryOwner);
                     throw new Exception();
                 }
 
@@ -181,30 +174,30 @@ namespace GalleryDatabase.Areas.Identity.Pages.Account.Manage
                 SixLabors.ImageSharp.Image img = SixLabors.ImageSharp.Image.Load(DirectoryPath, out IImageFormat format);
                 SixLabors.ImageSharp.Image pic;
 
-                
-                    using (pic = SixLabors.ImageSharp.Image.Load(ims.ToArray()))
+
+                using (pic = SixLabors.ImageSharp.Image.Load(ims.ToArray()))
+                {
+                    if (pic.Width > pic.Height)
                     {
-                        if (pic.Width > pic.Height)
-                        {
-                            pic.Mutate(x => x.Resize(0, 320));
-                        }
-                        else
-                        {
-                            pic.Mutate(x => x.Resize(320, 0));
-                        }
-
-                        pic.Mutate(x => x.Crop(new Rectangle((pic.Width - 320) / 2, (pic.Height - 320) / 2, 320, 320)));
-                        System.IO.File.Delete(DirectoryPath);
-                        using (fileStream = new FileStream(DirectoryPath, FileMode.Create))
-                        {
-                            pic.Save(fileStream, format);
-                            GalleryOwner.ProfileImageSize = fileStream.Length;
-                        }
-
-                        GalleryOwner.ProfileImageHeight = pic.Height;
-                        GalleryOwner.ProfileImageWidth = pic.Width;
+                        pic.Mutate(x => x.Resize(0, 320));
                     }
-                
+                    else
+                    {
+                        pic.Mutate(x => x.Resize(320, 0));
+                    }
+
+                    pic.Mutate(x => x.Crop(new Rectangle((pic.Width - 320) / 2, (pic.Height - 320) / 2, 320, 320)));
+                    System.IO.File.Delete(DirectoryPath);
+                    using (fileStream = new FileStream(DirectoryPath, FileMode.Create))
+                    {
+                        pic.Save(fileStream, format);
+                        GalleryOwner.ProfileImageSize = fileStream.Length;
+                    }
+
+                    GalleryOwner.ProfileImageHeight = pic.Height;
+                    GalleryOwner.ProfileImageWidth = pic.Width;
+                }
+
 
                 using (pic = SixLabors.ImageSharp.Image.Load(ims.ToArray()))
                 {
@@ -263,6 +256,7 @@ namespace GalleryDatabase.Areas.Identity.Pages.Account.Manage
                 System.IO.File.Delete(DirectoryPath);
                 failedProcessing++;
             }
+
             if (failedProcessing == 0)
             {
                 SuccessMessage = "Image has been uploaded successfuly.";
@@ -271,6 +265,7 @@ namespace GalleryDatabase.Areas.Identity.Pages.Account.Manage
             {
                 ErrorMessage = "There were " + failedProcessing + " errors during uploading and processing of image.";
             }
+
             return RedirectToPage("./Index");
         }
 
