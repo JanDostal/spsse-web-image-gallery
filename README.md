@@ -1,9 +1,16 @@
-# spsse-web-image-gallery
-2020p3web-gallery-JanDostal created by GitHub Classroom
+## App description
 
-## Instructions:
-1. Clone repository
-2. Press start button (green arrow) on the main Visual Studio toolbar
+- This web application represents the image gallery, with addition of comments (comments are associated with images)
+- App requires authorization either locally or through external provider (Google, Facebook)
 
-## Notes 
-* You don't need to run command _Update-Database_, this web application does it automatically.
+## Development info
+
+- App was being developed starting from march 2021 to june 2021
+- App was uploaded from school repository to this repository in may 2022, which was at the end of last year in middle school
+- Revision happened in august 2023, which starts from commit [b7d0a7c](https://github.com/JanDostal/spsse-web-image-gallery/commit/b7d0a7cd748406e88fedb4b79ed37652469567a1)
+
+## Instructions for starting app
+
+1. Open App in **Visual Studio**
+2. Press **start button (green arrow)** on the main Visual Studio toolbar
+    - You don't need to run command ***Update-Database***, this web application does it automatically.
