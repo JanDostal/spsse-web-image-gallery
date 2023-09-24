@@ -1,7 +1,11 @@
 ## App description
 
-- This web application represents the image gallery, with addition of comments (comments are associated with images)
-- App requires authorization either locally or through external provider (Google, Facebook)
+- This web application represents the image gallery, which allows:
+    - Uploading images
+    - Categorizing images into albums
+    - Creating albums inside personal gallery
+    - Writing text comments for chosen public image
+- App supports authorization either locally or through external provider (Google, Facebook)
 
 ## Development info
 
