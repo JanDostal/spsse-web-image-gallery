@@ -17,4 +17,4 @@
 
 1. Open App in **Visual Studio**
 2. Press **start button (green arrow)** on the main Visual Studio toolbar
-    - You don't need to run command ***Update-Database***, this web application does it automatically.
+    - You don't need to run command ***Update-Database***, this web application does it automatically
