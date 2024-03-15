@@ -11,7 +11,7 @@
 
 - App was being developed between march 2021 and may 2021
 - App was uploaded from school repository to this repository in may 2022, which was at the end in the last year of secondary school
-- Revision happened in august 2023, which starts from commit [b7d0a7c](https://github.com/JanDostal/spsse-web-image-gallery/commit/b7d0a7cd748406e88fedb4b79ed37652469567a1)
+- Revision happened in august 2023, which starts from commit [b7d0a7c](/../../commit/b7d0a7cd748406e88fedb4b79ed37652469567a1)
 
 # Instructions for starting app
 
